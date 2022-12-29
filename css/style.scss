@@ -1,0 +1,19 @@
+a{
+    text-decoration: none;
+    color: black;
+}
+
+ul{
+    list-style: none;
+}
+
+.text-blue{
+    color: $blue-principal;
+}
+
+
+.el-avatar{
+    > img{
+        width: 100%;
+    }
+}
