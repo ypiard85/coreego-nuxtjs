@@ -192,7 +192,7 @@ export default {
     },
 
     inCarnet() {
-      if (auth.currentUser) {
+      if (this.user) {
         return (
           Array.isArray(this.carnet) &&
           this.carnet.length > 0 &&
@@ -203,7 +203,7 @@ export default {
 
     isAuthPlace() {
       return (
-        auth && auth.currentUser && this.place && this.place.user.localId === auth.currentUser.uid
+        this.user && this.place && this.place.user.localId === this.user.uid
       );
     },
 
@@ -278,7 +278,7 @@ export default {
       })
         .then(async () => {
           this.loadingBtn = false;
-          await this.loadCarnet()
+          await this.loadCarnet(this.user.uid)
           this.$message.success('Ce lieu à été ajouter à votre carnet de route')
         })
         .catch((e) => {
@@ -294,8 +294,8 @@ export default {
         places: this.carnet,
       })
         .then(async () => {
+          await this.loadCarnet(this.user.uid)
           this.loadingBtn = false;
-          await this.loadCarnet()
           this.$message.success('Ce lieu à été supprimer de votre carnet de route')
         })
         .catch((e) => {
@@ -318,9 +318,9 @@ export default {
         thumbnail: this.thumbnail,
         thumbnailUrl: thumbnailUrl
       })
-        .then(() => {
+        .then(async () => {
           this.busy = false;
-          this.loadPlaces();
+          await this.loadPlaces();
           this.$notify.success({
             title: "Images",
             message: "Gestion des images mis à jour",

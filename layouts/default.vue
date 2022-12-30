@@ -48,7 +48,6 @@ export default {
 
   methods: {
     ...mapActions('auth', ['logout']),
-    // ...mapActions("place", ["loadPlaces","loadCities", "loadCategories"]),
     ...mapActions('app', [
       'loadCities',
       'loadCategories',
@@ -63,10 +62,13 @@ export default {
         this.loadCities(),
         this.loadCategories(),
         this.loadUsers(),
-        this.loadPlaces(),
-        this.loadCarnet(),
+        this.loadPlaces()
       ])
-        .then(() => {
+      .then(() => {
+        if(this.currentUser){
+          this.loadCarnet(this.currentUser.uid)
+        }
+
           this.busy = false
         })
         .catch((e) => console.log(e))

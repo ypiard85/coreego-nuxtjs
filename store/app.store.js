@@ -56,20 +56,19 @@ export default {
     },
     updateCarnet(state, place) {
       state.carnet = place;
-    }
+    },
+
   },
 
   actions: {
-    async loadCarnet(context) {
-      if (auth.currentUser) {
-        const carnetRef = doc(db, "carnets", auth.currentUser.uid);
-        const carnetSnap = await getDoc(carnetRef);
-        if (carnetSnap.exists()) {
-          context.commit("updateCarnet", carnetSnap.data().places);
+    async loadCarnet(context, user) {
+       const carnetRef = doc(db, "carnets", user);
+       const carnetSnap = await getDoc(carnetRef);
+       if (carnetSnap.exists()) {
+         context.commit("updateCarnet", carnetSnap.data().places);
         }else{
           context.commit("updateCarnet", []);
         }
-      }
     },
 
     async loadProfil(context, user){

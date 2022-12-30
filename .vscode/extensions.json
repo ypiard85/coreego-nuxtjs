@@ -1,0 +1,18 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "abusaidm.html-snippets",
+    "xabikos.javascriptsnippets",
+    "christian-kohler.npm-intellisense",
+    "esbenp.prettier-vscode",
+    "octref.vetur",
+    "visualstudioexptteam.vscodeintellicode",
+    "sdras.vue-vscode-snippets",
+    "formulahendry.auto-close-tag",
+    "formulahendry.auto-complete-tag",
+    "formulahendry.auto-rename-tag",
+    "mgmcdermott.vscode-language-babel",
+    "coenraads.bracket-pair-colorizer-2",
+    "oouo-diogo-perdigao.docthis"
+  ]
+}

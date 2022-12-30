@@ -4,12 +4,16 @@
       :to="'/places/view/'+ place.id "
     >
       <el-card :body-style="{ padding: '0px' }" class="shadow">
+        <div class="d-flex align-items-center py-2 ps-2 bg-light">
+          <el-avatar class="me-2" :src="place.user.photoUrl"></el-avatar>
+          <span class="fw-bold text-blue">{{place.user.displayName}}</span>
+        </div>
         <el-image
           :src="place.thumbnailUrl"
           fit="cover"
           style="height: 200px; width: 100%"
         />
-        <div style="padding: 14px">
+        <div style="padding: 14px" class="bg-light">
           <strong class="d-block text-truncate">{{ place.title }} </strong>
           <div class="bottom clearfix mt-3">
             <div class="d-flex">
@@ -20,6 +24,9 @@
                 >{{ city.label }}</el-link
               >
               <vui-tag :color="category.color" :label="category.label" />
+            </div>
+            <div class="mt-2">
+                <small>{{ timeAgo }} </small>
             </div>
           </div>
         </div>
@@ -36,6 +43,7 @@
   import {mapGetters} from 'vuex';
   import { getDownloadURL, ref as storageRef, deleteObject } from "firebase/storage";
   import { storage } from "~/plugins/firebase";
+  import moment from 'moment'
   import VuiTag from '@/components/vui-alpha/VuiTag'
 
   export default {
@@ -59,6 +67,11 @@
       city(){
         return this.cities.find(city => city.id === this.place.city)
       },
+
+      timeAgo(){
+        return moment(new Date(this.place.created_at.seconds * 1000)).locale('fr').fromNow()
+      }
+
     },
   };
   </script>

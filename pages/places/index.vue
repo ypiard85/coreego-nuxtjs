@@ -1,55 +1,36 @@
 <template>
-    <div>
-      <filter-places
-        :categories="categories"
-        :cities="cities"
-        :openModal="openModal"
-        @filter-search="onFilterSearch"
-        :search="search"
-        @filter-alphabet="onFilterAlphabet"
-        :filterAlphabet="filterAlphabet"
-        @filter-date="onFilterDate"
-        :filterDate="filterDate"
-        @filter-city="city = $event"
-        :city="city"
-        @filter-category="category = $event"
-        :category="category"
-        @on-submit-filter="onSubmitFilter"
-        :colorCategory="colorCategory"
+  <div>
+    <!-- Filtre -->
+    <filter-places
+      @change-search-value="search = $event"
+      @change-text-status="onChangeTextStatus"
+      @change-date-status="onChangeDateStatus"
+      @change-city="city = $event, onSubmitFilter()"
+      @change-category="category = $event, onSubmitFilter()"
+      @change-user-value="user = $event, onSubmitFilter()"
       />
-      <b-container fluid="sm" v-if="places">
-        <template v-if="places.at(0)">
-          <el-row :gutter="10">
-            <el-col
-              :xs="24"
-              :sm="12"
-              :md="12"
-              :lg="8"
-              class="mb-2"
-              v-for="(place, i) in searchFilter"
-              :key="i"
-            >
-              <card-place :place="place" v-if="!busy" />
-            </el-col>
-          </el-row>
-        </template>
-        <el-empty description="Aucun lieu trouvé" v-else></el-empty>
-      </b-container>
-      <slot name="loading" v-else />
-    </div>
-  </template>
+    <!-- Conent -->
+    <b-container fluid="sm" v-if="places">
+      <template v-if="places.at(0)">
+        <el-row :gutter="10">
+          <el-col :xs="24" :sm="12" :md="12" :lg="8" class="mb-2" v-for="(place, i) in searchFilter" :key="i">
+            <card-place :place="place" v-if="!busy" />
+          </el-col>
+        </el-row>
+      </template>
+      <el-empty description="Aucun lieu trouvé" v-else="v-else"></el-empty>
+    </b-container>
+    <slot name="loading" v-else="v-else" />
+  </div>
+</template>
 
-  <script>
+<script>
   import { mapGetters } from "vuex";
   import VuiSearchInput from "~/components/vui-alpha/input/VuiSearchInput";
   import CardPlace from "~/components/card/CardPlace";
   import FilterPlaces from "../components/FilterPlaces";
   import { mapActions } from "vuex";
-  import {
-    getDownloadURL,
-    ref as storageRef,
-    deleteObject,
-  } from "firebase/storage";
+  import { getDownloadURL, ref as storageRef, deleteObject } from "firebase/storage";
   import { storage } from "~/plugins/firebase";
 
   export default {
@@ -57,19 +38,21 @@
     components: {
       VuiSearchInput,
       CardPlace,
-      FilterPlaces,
+      FilterPlaces
     },
     data() {
       return {
         search: "",
-        filterAlphabet: false,
         city: null,
         category: null,
-        filterDate: false,
+
+        user: null,
+
+        loadingUser: false,
 
         openModal: false,
         busy: false,
-        places: null,
+        places: null
       };
     },
 
@@ -78,21 +61,16 @@
         placesStore: "getPlaces",
         cities: "getCities",
         categories: "getCategories",
+        usersStore: 'getUsers'
       }),
+
       searchFilter() {
-        return (
-          this.places &&
-          this.places.filter((place) =>
-            place.title.toLowerCase().includes(this.search.toLowerCase())
-          )
-        );
+        return this.places && this.places.filter((place) => place.title.toLowerCase().includes(this.search.toLowerCase()))
       },
+
       colorCategory() {
-        return this.category
-          ? this.categories.find((category) => category.id === this.category)
-              .color
-          : null;
-      },
+        return this.category ? this.categories.find((category) => category.id === this.category).color : null;
+      }
     },
 
     async created() {
@@ -102,19 +80,14 @@
     methods: {
       ...mapActions("app", ["loadPlaces"]),
 
-      onFilterSearch(value) {
-        this.search = value;
-      },
-
-      onFilterAlphabet() {
-        this.filterAlphabet = !this.filterAlphabet;
-        if (!this.filterAlphabet) {
+      onChangeTextStatus(value) {
+        if (!value) {
           this.places.sort(function (a, b) {
             if (a.title > b.title) {
               return -1;
             }
           });
-        } else if (this.filterAlphabet) {
+        } else if (value) {
           this.places.sort(function (a, b) {
             if (a.title < b.title) {
               return -1;
@@ -123,15 +96,14 @@
         }
       },
 
-      onFilterDate() {
-        this.filterDate = !this.filterDate;
-        if (!this.filterDate) {
+      onChangeDateStatus(value) {
+        if (!value) {
           this.places.sort(function (a, b) {
             if (a.created_at > b.created_at) {
               return -1;
             }
           });
-        } else if (this.filterDate) {
+        } else if (value) {
           this.places.sort(function (a, b) {
             if (a.created_at < b.created_at) {
               return -1;
@@ -143,20 +115,21 @@
       onSubmitFilter() {
         this.places = [...this.placesStore];
 
-        this.city == "" && (this.city = null);
-        this.category == "" && (this.category = null);
-
         if (this.city) {
-          this.places = this.places.filter((place) => place.city === this.city);
+          this.places = this.places.filter((place) => place.city === this.city)
         }
-        if (this.category) {
-          this.places = this.places.filter(
-            (place) => place.category === this.category
-          );
-        }
-      },
-    },
-  };
-  </script>
 
-  <style lang="scss" scoped></style>
+        if (this.category) {
+          this.places = this.places.filter((place) => place.category === this.category);
+        }
+
+        if(this.user){
+          this.places = this.places.filter((place) => place.user.localId === this.user);
+        }
+
+      }
+    }
+  };
+</script>
+
+<style lang="scss" scoped="scoped"></style>
