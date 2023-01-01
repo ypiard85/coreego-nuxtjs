@@ -1,5 +1,5 @@
 <template>
-    <el-tag effect="dark" :style="{'background': color, 'border': 'none'}" > {{ label }}</el-tag>
+    <el-tag effect="dark" size="small" :style="{'background': color, 'border': 'none'}" > {{ label }}</el-tag>
 </template>
 <script>
 export default {

@@ -1,4 +1,5 @@
 {
     "nuxt.isNuxtApp": true,
     "editor.tabSize": 2,
+    "nuxt.portNumber": 4000,
 }

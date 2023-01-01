@@ -2,6 +2,7 @@
   <div>
     <!-- Filtre -->
     <filter-places
+      v-if="filter"
       @change-search-value="search = $event"
       @change-text-status="onChangeTextStatus"
       @change-date-status="onChangeDateStatus"
@@ -14,7 +15,7 @@
       <template v-if="places.at(0)">
         <el-row :gutter="10">
           <el-col :xs="24" :sm="12" :md="12" :lg="8" class="mb-2" v-for="(place, i) in searchFilter" :key="i">
-            <card-place :place="place" v-if="!busy" />
+            <card-place :place="place" />
           </el-col>
         </el-row>
       </template>
@@ -35,6 +36,15 @@
 
   export default {
     name: "places",
+
+    props:{
+      filter:{
+        type: Boolean,
+        required: false,
+        default: true
+      }
+    },
+
     components: {
       VuiSearchInput,
       CardPlace,

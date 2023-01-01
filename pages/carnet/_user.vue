@@ -1,15 +1,15 @@
 <template>
     <div>
-      <el-dialog :fullscreen="true" :visible="true" :show-close="false" v-if="places">
-        <KakaoMap
+        <el-dialog :fullscreen="true" :visible="true" :show-close="false" v-if="places">
+          <KakaoMap
           id="mapmarker"
           :width-options="false"
           :isMultiMarker="true"
           :places="places"
-        />
-      </el-dialog>
-      <el-empty description="Votre carnet de route est vide" v-else></el-empty>
-
+          />
+        </el-dialog>
+        <el-empty description="Votre carnet de route est vide" v-else></el-empty>
+      </div>
     </div>
   </template>
 

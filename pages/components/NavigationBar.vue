@@ -71,7 +71,7 @@
                         <el-dropdown-item>
                             <NuxtLink class="d-block" :to="'/carnet/' + user.uid ">
                                 <i class="el-icon-notebook-1"></i>
-                                Carnet de routes</NuxtLink>
+                                Carnet de route</NuxtLink>
                         </el-dropdown-item>
                         <el-dropdown-item>
                             <a class="d-block" to="/" @click="handleLogOut">

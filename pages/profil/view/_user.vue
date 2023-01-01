@@ -2,7 +2,7 @@
     <div class="profil mb-5" v-loading="isBusy">
         <div class="profil__header" v-if="user && avatarUrl">
             <div class="profil__header--thumbnail">
-                <el-image v-if="!thumbnail" :src="thumbnailUrl" style="width: 100%"></el-image>
+                <el-image v-if="!thumbnail" :src="couvertureUrl" style="width: 100%"></el-image>
                 <el-image v-else="v-else" :src="thumbnail.url"></el-image>
                 <vui-single-upload v-if="isAuthProfil" class="button_upload" @change-file="handleFileCouverture"
                     icon="el-icon-edit text-dark" />
@@ -22,7 +22,7 @@
                 <section class="profil--about mt-3">
                     <el-card class="box-card">
                         <div slot="header" class="clearfix">
-                            <span>A propos</span>
+                            <span class="fw-bold">A propos</span>
                             <el-button v-if="isAuthProfil" @click="openAbout = !openAbout"
                                 style="float: right; padding: 3px 0" class="text-dark" type="text"
                                 icon="el-icon-edit"></el-button>
@@ -47,15 +47,17 @@
                 <section class="profil--places-published mt-3">
                     <el-card class="box-card">
                         <div slot="header" class="clearfix">
-                            <span>Lieux publiés</span>
-                            <el-button style="float: right; padding: 3px 0" type="text">Voir tous</el-button>
+                            <span class="fw-bold">Lieux publiés</span>
+                            <el-button style="float: right; padding: 3px 0" type="text"
+                                @click="visibleDialogPlace = true">Voir tous</el-button>
                         </div>
-                        <nuxt-link :to="'/places/view/' + place.id " :underline="false" v-for="(place, i) in placeAll"
+
+                        <nuxt-link :to="'/places/view/' + place.id " :underline="false" v-for="(place, i) in placeAll(5)"
                             :key="i" class="profil--places-published__content p-2">
                             <div class="d-flex align-items-center w-100">
                                 <el-image :src="place.thumbnailUrl" class="rounded me-3" fit="cover"></el-image>
                                 <div class="profil--places-published__content--title">
-                                    <p class="fs-6">{{ place.title }}</p>
+                                    <p class="fs-6 mb-1 fw-bold">{{ place.title }}</p>
                                     <div class="d-flex align-items-center">
                                         <p class="m-0 p-0 me-3">
                                             <i class="el-icon-location-outline" />
@@ -70,9 +72,20 @@
                     </el-card>
                 </section>
             </b-container>
-        </div>
 
-        <slot name="loading" v-else="v-else" />
+            <el-dialog :title="'Lieux de : ' + user.displayName  " :fullscreen="true" :visible="visibleDialogPlace" @close="visibleDialogPlace = false">
+                    <template v-if="places.at(0)">
+                        <el-row :gutter="10">
+                            <el-col :xs="24" :sm="12" :md="12" :lg="8" class="mb-2" v-for="(place, i) in placeAll(null)"
+                                :key="i">
+                                <card-place :place="place" />
+                            </el-col>
+                        </el-row>
+                    </template>
+
+            </el-dialog>
+
+        </div>
     </div>
 </template>
 
@@ -84,6 +97,7 @@
     import VuiTag from '~/components/vui-alpha/VuiTag';
     import { getDownloadURL, ref as storageRef, deleteObject, uploadBytesResumable } from "firebase/storage";
     import { auth, db, storage, updateProfileUser } from "~/plugins/firebase";
+    import ViewPlaces from '~/pages/places/index'
     import {
         doc,
         setDoc,
@@ -99,7 +113,8 @@
 
         components: {
             VuiSingleUpload,
-            VuiTag
+            VuiTag,
+            ViewPlaces
         },
 
         data() {
@@ -119,8 +134,8 @@
                 isBusy: false,
 
                 // ouverture
-                openAbout: false
-
+                openAbout: false,
+                visibleDialogPlace: false
             };
         },
 
@@ -157,10 +172,18 @@
             },
 
             placeAll() {
-                return this.places.filter(place => place.user.localId === this.$route.params.user).slice(0, 5)
+                return slice => {
+                    let results = this.places.filter(place => place.user.localId === this.$route.params.user)
+                    if(slice != null){
+                       return results.slice(0, slice)
+                    }else{
+                       return results
+                    }
+                }
+
             },
 
-            thumbnailUrl() {
+            couvertureUrl() {
                 if (this.profil && this.profil.thumbnail) {
                     return this.profil.thumbnail.url;
                 } else {
@@ -380,13 +403,13 @@
 
         &--places-published {
             .el-image {
-                min-width: 80px;
-                max-width: 80px;
-                height: 80px;
+                min-width: 50px;
+                max-width: 50px;
+                height: 50px;
             }
 
             &__content:not(:last-child) {
-                margin-bottom: 50px;
+                margin-bottom: 10px;
             }
 
             &__content {
