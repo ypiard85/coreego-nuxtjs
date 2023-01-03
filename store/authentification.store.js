@@ -10,25 +10,42 @@ export default {
   namespaced: true,
   state: {
     errorMessage: "",
-    user: null
+    isLogged : false,
   },
+
   getters: {
+
     getErrorMessage(state) {
       return state.errorMessage;
     },
-    getUser(state) {
-      return state.user;
+    getIsLogged(state) {
+      return state.isLogged;
     },
+
   },
+
   mutations: {
+
     SET_ERREUR_MESSAGE(state, value) {
       state.errorMessage = value;
+    },
+
+    UPDATE_IS_LOGED(state, status){
+      state.isLogged  = status
     }
+
   },
+
   actions: {
+
+    setIsLogged(context, status){
+      context.commit('UPDATE_IS_LOGED', status)
+    },
+
     async logout({ commit }) {
       try {
         await signOut(auth);
+        commit('UPDATE_IS_LOGED', false)
         window.location.href = "/login";
       } catch (error) {}
     },

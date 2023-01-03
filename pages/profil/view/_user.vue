@@ -1,5 +1,6 @@
 <template>
     <div class="profil mb-5" v-loading="isBusy">
+        <Middleware :userProfil="true" />
         <div class="profil__header" v-if="user && avatarUrl">
             <div class="profil__header--thumbnail">
                 <el-image v-if="!thumbnail" :src="couvertureUrl" style="width: 100%"></el-image>
@@ -52,8 +53,8 @@
                                 @click="visibleDialogPlace = true">Voir tous</el-button>
                         </div>
 
-                        <nuxt-link :to="'/places/view/' + place.id " :underline="false" v-for="(place, i) in placeAll(5)"
-                            :key="i" class="profil--places-published__content p-2">
+                        <nuxt-link :to="'/places/view/' + place.id " :underline="false"
+                            v-for="(place, i) in placeAll(5)" :key="i" class="profil--places-published__content p-2">
                             <div class="d-flex align-items-center w-100">
                                 <el-image :src="place.thumbnailUrl" class="rounded me-3" fit="cover"></el-image>
                                 <div class="profil--places-published__content--title">
@@ -73,15 +74,16 @@
                 </section>
             </b-container>
 
-            <el-dialog :title="'Lieux de : ' + user.displayName  " :fullscreen="true" :visible="visibleDialogPlace" @close="visibleDialogPlace = false">
-                    <template v-if="places.at(0)">
-                        <el-row :gutter="10">
-                            <el-col :xs="24" :sm="12" :md="12" :lg="8" class="mb-2" v-for="(place, i) in placeAll(null)"
-                                :key="i">
-                                <card-place :place="place" />
-                            </el-col>
-                        </el-row>
-                    </template>
+            <el-dialog :title="'Lieux de : ' + user.displayName  " :fullscreen="true" :visible="visibleDialogPlace"
+                @close="visibleDialogPlace = false">
+                <template v-if="places.at(0)">
+                    <el-row :gutter="10">
+                        <el-col :xs="24" :sm="12" :md="12" :lg="8" class="mb-2" v-for="(place, i) in placeAll(null)"
+                            :key="i">
+                            <card-place :place="place" />
+                        </el-col>
+                    </el-row>
+                </template>
 
             </el-dialog>
 
@@ -107,6 +109,7 @@
         updateDoc
     } from "firebase/firestore";
     import { deleteImage } from "@/utils/request";
+    import Middleware from '~/pages/components/Middleware'
 
     export default {
         name: "profil",
@@ -114,7 +117,8 @@
         components: {
             VuiSingleUpload,
             VuiTag,
-            ViewPlaces
+            ViewPlaces,
+            Middleware
         },
 
         data() {
@@ -174,10 +178,10 @@
             placeAll() {
                 return slice => {
                     let results = this.places.filter(place => place.user.localId === this.$route.params.user)
-                    if(slice != null){
-                       return results.slice(0, slice)
-                    }else{
-                       return results
+                    if (slice != null) {
+                        return results.slice(0, slice)
+                    } else {
+                        return results
                     }
                 }
 

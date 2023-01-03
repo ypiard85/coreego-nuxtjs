@@ -14,22 +14,14 @@
 <script>
 export default {
   name: 'HomePage',
-
-
-  computed:{
-    descriptionSite(){
-      return ''
-    }
-  }
-
 }
 </script>
 
 <style scoped lang="scss">
   .home-page{
     header{
-      min-height: 300px;
-      background-color: gray;
+      /* min-height: 300px; */
+      background-color: 'gray';
     }
   }
 </style>

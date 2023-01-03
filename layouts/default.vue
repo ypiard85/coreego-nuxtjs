@@ -13,72 +13,78 @@
 </template>
 
 <script>
-import { onAuthStateChanged } from '@firebase/auth'
-import { auth, db } from '~/plugins/firebase'
-import { doc, setDoc, getDoc } from 'firebase/firestore'
-import { mapActions, mapGetters } from 'vuex'
-import NavigationBar from '~/pages/components/NavigationBar'
-import LoadingPage from '~/pages/components/LoadingPage'
-export default {
-  components: { NavigationBar, LoadingPage },
+  import { onAuthStateChanged } from '@firebase/auth'
+  import { auth, db } from '~/plugins/firebase'
+  import { doc, setDoc, getDoc } from 'firebase/firestore'
+  import { mapActions, mapGetters } from 'vuex'
+  import NavigationBar from '~/pages/components/NavigationBar'
+  import LoadingPage from '~/pages/components/LoadingPage'
+  export default {
+    components: { NavigationBar, LoadingPage },
 
-  data(){
-    return{
-      busy: false
-    }
-  },
-
-  async created() {
-    onAuthStateChanged(auth, (user) => {
-      //notif test
-      if (user) {
-        console.log(user)
-        setDoc(doc(db, 'users', user.uid), {
-          ...user.reloadUserInfo,
-          providerUserInfo: user.reloadUserInfo.providerUserInfo[0],
-        })
-      } else {
-        console.log('PAS USER')
+    data() {
+      return {
+        busy: false
       }
-    })
-    await this.loadApp()
-  },
-
-  computed: {
-    currentUser() {
-      return auth && auth.currentUser
     },
-  },
 
-  methods: {
-    ...mapActions('auth', ['logout']),
-    ...mapActions('app', [
-      'loadCities',
-      'loadCategories',
-      'loadUsers',
-      'loadPlaces',
-      'loadCarnet',
-    ]),
+    async created() {
+      onAuthStateChanged(auth, (user) => {
+        //notif test
+        if (user) {
+          console.log(user)
+          setDoc(doc(db, 'users', user.uid), {
+            ...user.reloadUserInfo,
+            providerUserInfo: user.reloadUserInfo.providerUserInfo[0],
+          })
+          this.setIsLogged(true)
+        } else {
+          console.log('PAS USER')
+        }
+      })
+      await this.loadApp()
+    },
 
-    async loadApp() {
-      this.busy = true
-      await Promise.all([
-        this.loadCities(),
-        this.loadCategories(),
-        this.loadUsers(),
-        this.loadPlaces()
-      ])
-      .then(() => {
-        if(this.currentUser){
-          this.loadCarnet(this.currentUser.uid)
+    computed: {
+
+      currentUser() {
+        return auth && auth.currentUser
+      },
+    },
+
+    methods: {
+      ...mapActions('auth', ['logout', 'setIsLogged']),
+      ...mapActions('app', [
+        'loadCities',
+        'loadCategories',
+        'loadCarnet',
+        'loadUsers',
+        'loadPlaces',
+      ]),
+
+      async loadApp() {
+        try {
+          this.busy = true
+          await Promise.all([
+            this.loadCities(),
+            this.loadCategories(),
+            this.loadUsers(),
+            this.loadPlaces()
+          ])
+          if (this.currentUser) {
+            await this.loadCarnet(this.currentUser.uid)
+          }
+        } catch (error) {
+          console.log(error)
+        } finally {
+          this.busy = false
         }
 
-          this.busy = false
-        })
-        .catch((e) => console.log(e))
+
+
+      },
     },
-  },
-}
+  }
 </script>
 
 <style scoped lang="scss"></style>

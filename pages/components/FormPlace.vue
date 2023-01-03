@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-container class="mt-5" v-if="placeLoaded">
+    <b-container class="mt-5" v-if="placeLoaded" v-loading="busy" >
       <el-form
         @submit.native.prevent
         :status-icon="true"
@@ -94,7 +94,6 @@
 
         <el-form-item>
           <el-button
-            :loading="busy"
             type="primary"
             @click="submitForm('ruleForm')"
           >
@@ -349,10 +348,7 @@ export default {
       this.busy = true;
       this.$refs[formName].validate(async (valid) => {
         if (!valid || !this.imageValidation || this.errorLocalisation) {
-          this.$notify.error({
-            title: "Ajout d'un lieu",
-            message: "Veuillez vérifier votre formulaire",
-          });
+          this.$message.error("Veuillez vérifier votre formulaire");
           this.busy = false;
         } else {
           try {
@@ -379,11 +375,7 @@ export default {
 
               await addDoc(collection(db, "lieux"), formData);
               await this.loadPlaces();
-              this.$notify.success({
-                title: "Ajour d'un lieu",
-                message: "Lieu ajouté",
-              });
-              this.busy = false;
+              this.$message.success("Lieu ajouté")
               this.$router.push("/");
 
             } else {
@@ -394,7 +386,7 @@ export default {
                     "lieux/" + trashImage.name
                   );
                   await deleteObject(imageRef);
-                  console.log("trashImae function");
+
                 }
               }
 
@@ -418,27 +410,17 @@ export default {
               }
 
                 await setDoc(doc(db, "lieux", this.$route.params.id), formData);
-                this.$notify.success({
-                title: "Modification d'un lieu",
-                message: "Lieu modifié",
-              });
-              this.busy = false;
+                this.$message.success("Lieu modifié");
               await this.loadPlaces();
               this.$router.replace('/places/view/' + this.place.id)
             }
           } catch (error) {
             if (!this.isEditMode) {
-              this.$notify.error({
-                title: "Ajout d'un lieu",
-                message: error,
-              });
+              this.$notify.error(error);
             } else {
-              console.log(error);
-              this.$notify.error({
-                title: "Modification d'un lieu",
-                message: error,
-              });
+              this.$message.error(error);
             }
+          } finally {
             this.busy = false;
           }
         }

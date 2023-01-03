@@ -1,6 +1,7 @@
 <template>
     <div>
       <!-- <Header title="Editer un lieu" icon="pencil" /> -->
+      <Middleware :editPlace="true" />
       <form-place :isEditMode="true" :place="place" :placeLoaded="placeLoaded" />
     </div>
   </template>
@@ -9,10 +10,12 @@
   import FormPlace from "./../../components/FormPlace";
   import {auth} from '~/plugins/firebase';
   import {mapGetters, mapActions} from 'vuex';
+  import Middleware from '~/pages/components/Middleware'
 
   export default {
     name: 'placeEdit',
-    components: { FormPlace },
+    middleware: 'authenticated',
+    components: { FormPlace, Middleware },
 
     data(){
       return{
@@ -44,17 +47,7 @@
 
     methods:{
       loadCurrentPlace() {
-        let currentPlace = this.places.find(
-          (place) => place.id === this.$route.params.id
-        );
-        if (
-          !currentPlace ||
-          (this.user && currentPlace.user.localId !== this.user.uid)
-        ) {
-          this.$router.replace('/places/add');
-        } else {
-          this.place = currentPlace;
-        }
+        this.place = this.places.find((place) => place.id === this.$route.params.id)
       },
     }
 

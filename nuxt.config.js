@@ -4,6 +4,7 @@ export default {
 
   meta: {"layout":"layoutApp"},
 
+
   server: {
     port: 8000, // default: 3000
     host: '0.0.0.0' // default: localhost
@@ -51,7 +52,7 @@ export default {
     },
     ssr: false, // default
     emulatorPort: process.env.NODE_ENV === 'development' ? 8000 : undefined,
-    emulatorHost: 'http://192.168.1.29',
+    emulatorHost: 'localhost',
   },
 
   firestore: {
@@ -59,7 +60,7 @@ export default {
     chunkName: process.env.NODE_ENV !== 'production' ? 'firebase-auth' : '[id]', // default
     enablePersistence: true,
     emulatorPort: 8000,
-    emulatorHost: 'http://192.168.1.29',
+    emulatorHost: 'localhost',
     settings: {
       // Firestore Settings - currently only works in SPA mode
     }

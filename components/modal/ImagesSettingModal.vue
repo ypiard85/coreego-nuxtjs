@@ -50,7 +50,7 @@
       >
       <el-button
         icon="el-icon-check"
-        :loading="busy"
+        :loading="modalmodalBusy"
         type="success"
         @click="$emit('on-submit-setting-images')"
         >Valider</el-button
@@ -72,7 +72,7 @@ export default {
       type: String,
       required: true,
     },
-    busy: {
+    modalmodalBusy: {
       type: Boolean,
       required: false,
     },

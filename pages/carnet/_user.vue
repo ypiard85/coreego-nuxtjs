@@ -1,21 +1,17 @@
 <template>
-    <div>
-        <el-dialog :fullscreen="true" :visible="true" :show-close="false" v-if="places">
-          <KakaoMap
-          id="mapmarker"
-          :width-options="false"
-          :isMultiMarker="true"
-          :places="places"
-          />
-        </el-dialog>
-        <el-empty description="Votre carnet de route est vide" v-else></el-empty>
-      </div>
-    </div>
-  </template>
+  <div>
+      <Middleware :carnetUser="true" />
+      <el-dialog :fullscreen="true" :visible="true" :show-close="false" v-if="places">
+        <KakaoMap id="mapmarker" :width-options="false" :isMultiMarker="true" :places="places" />
+      </el-dialog>
+      <el-empty description="Votre carnet de route est vide" v-else></el-empty>
+  </div>
+</template>
 
-  <script>
+<script>
   import KakaoMap from "~/components/map/KakaoMap";
   import { mapGetters } from "vuex";
+  import Middleware from '~/pages/components/Middleware'
   import {
     getDownloadURL,
     ref as storageRef,
@@ -25,16 +21,18 @@
 
   export default {
     name: "carnetDeRoute",
-    components: { KakaoMap },
+    middleware: 'authenticated',
+    components: { KakaoMap, Middleware },
 
     data() {
       return {
         places: null,
+        busy: false
       };
     },
 
-    async created() {
-      await this.loadPlaces();
+    created() {
+      this.loadPlaces();
     },
 
     computed: {
@@ -48,28 +46,29 @@
 
     methods: {
       async loadPlaces() {
-        if (this.carnets && this.carnets.length > 0) {
-          let placesStore = this.placesStore.filter((place) =>
-            this.carnets.includes(place.id)
-          );
+        console.log(Array.isArray(this.carnets), this.carnets)
+        if(Array.isArray(this.carnets)){
+          let placesStore = this.placesStore.filter((place) => this.carnets.includes(place.id));
           let places = [];
           for (let place of placesStore) {
             const PICTURE_REF = storageRef(storage, "lieux/" + place.thumbnail);
             const PICTURE = await getDownloadURL(PICTURE_REF);
+
             places.push({
               ...place,
-              cityName: this.cities[place.city].label,
-              categoryName: this.categories[place.category].label,
+              cityName: this.cities.find(city => city.id === place.city).label,
+              categoryName: this.categories.find(category => category.id === place.category).label
             });
           }
           this.places = places;
         }
+
       },
     },
   };
-  </script>
+</script>
 
-  <style scoped lang="scss">
+<style scoped lang="scss">
   ::v-deep .wrap {
     position: absolute;
     left: 0;
@@ -145,7 +144,7 @@
         color: #888;
         overflow: hidden;
 
-        img{
+        img {
           width: 100%;
           height: 100%;
           object-fit: cover;
@@ -159,4 +158,4 @@
       }
     }
   }
-  </style>
+</style>
