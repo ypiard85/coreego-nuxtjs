@@ -31,7 +31,7 @@
                         <div class="text" v-if="!openAbout">
                             <p v-if="profil && 'about' in profil && profil.about.length > 0"
                                 style="white-space: pre-line">{{ profil.about }}</p>
-                            <em v-else="v-else">Aucune description</em>
+                            <em v-else>Aucune description</em>
                         </div>
                         <el-form class="demo-ruleForm" v-else="v-else">
                             <el-form-item label="Parler un peu de vous">
@@ -49,27 +49,30 @@
                     <el-card class="box-card">
                         <div slot="header" class="clearfix">
                             <span class="fw-bold">Lieux publiés</span>
-                            <el-button style="float: right; padding: 3px 0" type="text"
+                            <el-button style="float: right; padding: 3px 0" type="text" v-if="placeAll(null).length"
                                 @click="visibleDialogPlace = true">Voir tous</el-button>
                         </div>
-
-                        <nuxt-link :to="'/places/view/' + place.id " :underline="false"
-                            v-for="(place, i) in placeAll(5)" :key="i" class="profil--places-published__content p-2">
-                            <div class="d-flex align-items-center w-100">
-                                <el-image :src="place.thumbnailUrl" class="rounded me-3" fit="cover"></el-image>
-                                <div class="profil--places-published__content--title">
-                                    <p class="fs-6 mb-1 fw-bold">{{ place.title }}</p>
-                                    <div class="d-flex align-items-center">
-                                        <p class="m-0 p-0 me-3">
-                                            <i class="el-icon-location-outline" />
-                                            {{ city(place.city).label }}
-                                        </p>
-                                        <vui-tag :label="category(place.category).label"
-                                            :color="category(place.category).color" />
+                        <template v-if="placeAll(null).length">
+                            <nuxt-link :to="'/places/view/' + place.id " :underline="false"
+                                v-for="(place, i) in placeAll(5)" :key="i"
+                                class="profil--places-published__content p-2">
+                                <div class="d-flex align-items-center w-100">
+                                    <el-image :src="place.thumbnailUrl" class="rounded me-3" fit="cover"></el-image>
+                                    <div class="profil--places-published__content--title">
+                                        <p class="fs-6 mb-1 fw-bold">{{ place.title }}</p>
+                                        <div class="d-flex align-items-center">
+                                            <p class="m-0 p-0 me-3">
+                                                <i class="el-icon-location-outline" />
+                                                {{ city(place.city).label }}
+                                            </p>
+                                            <vui-tag :label="category(place.category).label"
+                                                :color="category(place.category).color" />
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </nuxt-link>
+                            </nuxt-link>
+                        </template>
+                        <em v-else>Aucun lieu publié</em>
                     </el-card>
                 </section>
             </b-container>

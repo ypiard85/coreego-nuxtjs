@@ -1,6 +1,7 @@
 <template>
   <div>
-    <b-container class="mt-5" v-if="placeLoaded" v-loading="busy" >
+    <HeaderPage :isEditMode="isEditMode" />
+    <b-container class="mt-3" v-if="placeLoaded" v-loading="busy">
       <el-form
         @submit.native.prevent
         :status-icon="true"
@@ -8,7 +9,7 @@
         :rules="rules"
         ref="ruleForm"
         label-width="120px"
-        class="demo-ruleForm"
+        class="place-add_form"
         label-position="top"
       >
         <el-form-item label="Titre" prop="title">
@@ -29,9 +30,9 @@
         >
           <template #error>
             <small
-              style="margin-top: -20px; font-size: 12px; display: block"
+              style="margin-top: -10px; font-size: 12px; display: block"
               class="text-danger"
-              >Les coordonnées ne sont pas valide en Corée Du Sud</small
+              >Les coordonnées géographiques sont hors Corée Du Sud</small
             >
           </template>
         </input-geopoint>
@@ -140,6 +141,7 @@ import Axios from "axios";
 import { mapGetters, mapActions } from "vuex";
 import { auth, db, storage } from "~/plugins/firebase";
 import {getImageUrl} from './../../utils/request.js'
+import HeaderPage from './HeaderPage'
 import {
   getDownloadURL,
   ref as storageRef,
@@ -166,6 +168,7 @@ export default {
     VuiTextAreaInput,
     KakaoMap,
     InputGeopoint,
+    HeaderPage
   },
 
   props: {
@@ -453,9 +456,4 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.form__place__gestion {
-  width: 500px;
-  max-width: 100%;
-  margin: auto;
-}
 </style>

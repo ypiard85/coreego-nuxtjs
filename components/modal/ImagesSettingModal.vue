@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-loading="modalBusy">
     <main class="modal__main mt-3" v-if="images">
       <section class="thumbnail__setting">
         <h3 class="border-bottom border-dark">Image de couverture</h3>
@@ -72,7 +72,7 @@ export default {
       type: String,
       required: true,
     },
-    modalmodalBusy: {
+    modalBusy: {
       type: Boolean,
       required: false,
     },

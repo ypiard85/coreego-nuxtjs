@@ -1,3 +1,6 @@
+import path from 'path'
+import fs from 'fs'
+
 export default {
   // Disable server-side rendering: https://go.nuxtjs.dev/ssr-mode
   ssr: false,
@@ -5,16 +8,22 @@ export default {
   meta: {"layout":"layoutApp"},
 
 
+
   server: {
+     https: {
+      key: fs.readFileSync(path.resolve(__dirname, 'server.key')),
+      cert: fs.readFileSync(path.resolve(__dirname, 'server.crt')),
+    },
     port: 8000, // default: 3000
-    host: '0.0.0.0' // default: localhost
+    host: '0.0.0.0', // default: localhost,
+    timing: false
   },
 
   // Global page headers: https://go.nuxtjs.dev/config-head
   //https://nuxtjs.org/docs/features/meta-tags-seo/
   head: {
     title: 'coreego-nuxtjs-vuejs',
-    script:[ {src: 'http://dapi.kakao.com/v2/maps/sdk.js?appkey=138cf5e41b9fe087d4b159aae861026b'}],
+    script:[ {src: 'https://dapi.kakao.com/v2/maps/sdk.js?appkey=138cf5e41b9fe087d4b159aae861026b'}],
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },

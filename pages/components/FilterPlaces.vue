@@ -1,7 +1,7 @@
 <template>
-  <div class="filter-places py-3 my-3">
+  <div class="filter-places py-3 mb-3 bg-light">
     <b-container fluid="sm">
-      <p>Filtres :</p>
+      <p class="fw-bold">Filtres</p>
 
       <search-filter v-model="search" @input="$emit('change-search-value', $event)" />
 
@@ -12,6 +12,23 @@
         <el-button size="small" icon="el-icon-s-operation" @click="openDialog = true">
           Filtre avancé
         </el-button>
+        <ul class="p-0 mt-3 d-flex" v-if="showArianeFilter">
+          <li>
+            <el-tag closable type="success" v-if="city" @close="city = null, onChangeCity(null)">
+              {{cityName}}
+            </el-tag>
+          </li>
+          <li>
+            <el-tag closable v-if="category" @close="category = null, onChangeCategory(null) ">
+              {{categoryName}}
+            </el-tag>
+          </li>
+          <li>
+            <el-tag closable type="danger" v-if="userName" @close="userName = null, onChangeUser(null)">
+              {{userName}}
+            </el-tag>
+          </li>
+        </ul>
       </section>
 
       <el-dialog title="Filtre avancé" :visible="openDialog" class="filter-places__dialog" top="5vh"
@@ -37,8 +54,6 @@
             <el-form-item label="Utilisateur" class="w-100">
               <user-filter class="w-100" @clear-tag="userName = null" :userName="userName" @change="onChangeUser" />
             </el-form-item>
-
-
 
           </el-form>
         </section>
@@ -66,21 +81,34 @@
 
     data() {
       return {
+        openDialog: false,
+
         search: '',
         textstatus: false,
         dateStatus: false,
 
         userName: null,
-
         city: null,
         category: null,
 
-        openDialog: false,
       };
     },
 
     computed: {
-      ...mapGetters('app', { cities: 'getCities', categories: 'getCategories', users: 'getUsers' })
+      ...mapGetters('app', { cities: 'getCities', categories: 'getCategories', users: 'getUsers' }),
+
+      showArianeFilter(){
+        return this.userName || this.city || this.category
+      },
+
+      cityName(){
+        return this.city ? this.cities.find(city => city.id == this.city).label : null
+      },
+
+      categoryName(){
+        return this.category ? this.categories.find(category => category.id == this.category).label : null
+      },
+
     },
 
 
@@ -106,9 +134,9 @@
         this.$emit('change-category', this.category)
       },
 
-      onChangeUser($event){
+      onChangeUser($event) {
         let result = this.users.find(user => user.localId === $event)
-        if(result){
+        if (result) {
           this.userName = result.displayName
         }
         this.$emit('change-user-value', $event)

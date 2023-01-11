@@ -72,6 +72,7 @@ export default {
       await signInWithPopup(auth, new FacebookAuthProvider())
         .then((result) => {
           // The signed-in user info.
+          console.log(result)
           result.user;
           // This gives you a Facebook Access Token. You can use it to access the Facebook API.
           const credential = FacebookAuthProvider.credentialFromResult(result);
@@ -80,6 +81,7 @@ export default {
         })
         .catch((error) => {
           // Handle Errors here.
+          console.log(error)
           const errorCode = error.code;
           error.message;
           // The email of the user's account used.

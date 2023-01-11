@@ -1,30 +1,21 @@
 <template>
     <b-container class="d-flex align-items-center justify-content-center mt-5">
-      <b-card style="width: 500px; max-width: 100%">
-        <template #header>
-          <h1 class="fs-5" style="color: white">Connexion (remplacer css par element ui)</h1>
-        </template>
-        <b-card-body>
-          <b-button
-            type="button"
-            @click="handleGoogleLogin"
-            class="w-100 py-3 fw-bold"
-            variant="danger"
-            size="sm"
-          >
-            Se connecter avec google
-          </b-button>
-          <b-button
-            type="button"
-            class="w-100 mt-3 py-3 fw-bold"
-            @click="handleFacebookLogin"
-            variant="primary"
-            size="sm"
-          >
-            Se connecter avec Facebook
-          </b-button>
-        </b-card-body>
-      </b-card>
+      <el-card class="box-card" shadow="never">
+        <div slot="header" class="clearfix">
+          <span>Connexion</span>
+        </div>
+        <div class="card_button">
+          <el-alert v-if="errorAuth">{{ errorAuth }}</el-alert>
+          <el-row :gutter="10">
+            <el-col :xs="24" :sm="12" class="my-2" >
+              <el-button  @click="handleGoogleLogin" class="w-100" type="danger">Se connecter avec google</el-button>
+            </el-col>
+            <el-col :xs="24" :sm="12" class="my-2">
+              <el-button @click="handleFacebookLogin" class="ms-0 w-100" type="primary"> Se connecter avec Facebook</el-button>
+            </el-col>
+          </el-row>
+        </div>
+      </el-card>
     </b-container>
   </template>
 
@@ -62,5 +53,10 @@
   <style lang="scss" scoped>
   .card-header {
     background-color: $blue-principal!important;
+  }
+
+  .box-card{
+    width: 500px;
+    max-width: 100%;
   }
   </style>
