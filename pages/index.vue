@@ -1,27 +1,38 @@
 <template>
   <div class="home-page">
-    <header role="header de la page d'accueil" class="d-flex align-items-center">
-        <b-container>
-          <p class="text">
-            Avec COREEGO il n'a jamais était aussi facile de visiter la Corée Du Sud.<br>
-            Partager, cliquer, découvrer
-          </p>
-        </b-container>
-    </header>
+    <HomeHeader />
+    <section v-if="places.length > 0">
+      <b-container>
+        <p class="label h5 mb-3">Quelques lieux :</p>
+        <simple-swiper :max="6" :slidesPerView="3" :spaceBetween="30" :navigation="false" :pagination="true" :delay="3000" />
+      </b-container>
+    </section>
+    <!-- <AboutUs :categories="categories" /> -->
   </div>
 </template>
 
 <script>
-export default {
-  name: 'HomePage',
-}
+  import HomeHeader from './components/home/HomeHeader'
+  import AboutUs from './components/home/AboutUs'
+  import SimpleSwiper from '@/components/swiper/simpleSwiper'
+  import { mapGetters } from 'vuex'
+  export default {
+    name: 'HomePage',
+    components: { HomeHeader, AboutUs, SimpleSwiper },
+
+    computed: {
+      ...mapGetters('app', { categories: 'getCategories', places: 'getPlaces' })
+    }
+
+  }
 </script>
 
 <style scoped lang="scss">
-  .home-page{
-    header{
-      /* min-height: 300px; */
-      background-color: 'gray';
+  .home-page {
+
+    section {
+      margin: 30px 0;
     }
+
   }
 </style>

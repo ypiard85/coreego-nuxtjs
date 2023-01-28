@@ -1,6 +1,7 @@
-//ICONS
+//ICONS / IMAGES
 export const LOGO_PATH = require("../assets/logo_coreego.png");
 export const IMAGE_EMPTY = require('../assets/image_empty.png');
+export const IMG_HOME_PAGE_HEADER = require('../assets/header_homepage.jpg');
 export const ICON_DIAPO_NEXT_BTN = `<i class="bi bi-arrow-right-circle-fill"></i>`;
 export const ICON_DIAPO_PREV_BTN = `<i class="bi bi-arrow-left-circle-fill"></i>`;
 

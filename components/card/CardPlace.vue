@@ -17,11 +17,11 @@
           <strong class="d-block text-truncate">{{ place.title }} </strong>
           <div class="bottom clearfix mt-3">
             <div class="d-flex">
-              <el-link
-                class="me-2"
-                icon="el-icon-location-outline"
-                :underline="false"
-                >{{ city.label }}</el-link
+              <p
+                class="me-2 text-secondary"
+                >
+                <i class="el-icon-location-outline"></i>
+                {{ city.label }}</p
               >
               <vui-tag :color="category.color" :label="category.label" />
             </div>

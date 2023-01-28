@@ -2,21 +2,16 @@
   <div v-if="place">
     <section class="introduction__header">
       <div class="d-flex">
-        <el-link
-          class="me-2"
-          icon="el-icon-location-outline"
-          :underline="false"
-          >{{ city.label }}</el-link
-        >
+        <p class="me-2 text-secondary"><i class="el-icon-location-outline"></i>{{ city.label }}</p>
         <vui-tag :label="category.label" :color="category.color" />
       </div>
-      <router-link to="/" class="text-blue mt-3 d-inline-flex align-items-center">
+      <nuxt-link :to="'/profil/view/' + place.user.localId " class="text-blue mt-3 d-inline-flex align-items-center">
         <el-avatar
         :src="place.user.photoUrl"
         class="me-3"
         ></el-avatar>
         <span class="fw-bold">{{ place.user.displayName }}</span>
-      </router-link>
+      </nuxt-link>
       <h1 class="fs-3 mt-3">{{ place.title }}</h1>
     </section>
       <!-- description -->

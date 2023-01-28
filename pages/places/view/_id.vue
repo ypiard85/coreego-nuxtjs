@@ -11,9 +11,9 @@
 
           <section class="mt-5" v-if="user">
             <el-button v-if="!inCarnet" type="primary" @click="addPlaceToCarnet" :loading="loadingBtn"
-              icon="el-icon-plus">Ajouter</el-button>
+              icon="el-icon-plus">Carnet de route</el-button>
             <el-button v-else type="danger" :loading="loadingBtn" @click="deletePlaceToCarnet"
-              icon="el-icon-minus">Supprimer</el-button>
+              icon="el-icon-minus">Carnet de route</el-button>
             <el-dropdown @command="handleCommand" v-if="isAuthPlace" trigger="click">
               <span class="el-dropdown-link">
                 <el-button type="info" class="ms-3" icon="el-icon-setting" circle></el-button>
