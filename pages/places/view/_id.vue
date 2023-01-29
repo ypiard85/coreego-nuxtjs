@@ -28,16 +28,42 @@
         </b-container>
       </section>
 
-      <el-dialog :visible="openModalEdit" :fullscreen="true" :append-to-body="true" @close="openModalEdit = false">
+      <section role="commentaires">
+        <b-container>
+          <h5 class="text-blue my-3">Commentaires (5) </h5>
+          <el-button @click="openModalCommentaire = true" type="secondary" size="small" class="mb-3">
+            Ajouter un commentaire
+          </el-button>
+          <Commentaires class="single-place_commentaires">
+            <template #edit>
+              <div class="float-end">
+                <el-button type="text" class="me-1" icon="el-icon-edit"></el-button>
+                <el-button class="text-danger" type="text" icon="el-icon-delete-solid"></el-button>
+              </div>
+            </template>
+          </Commentaires>
+        </b-container>
+      </section>
+
+      <el-dialog v-loading="modalBusy" title="Ajouter un commentaire" @close="openModalCommentaire = false"
+        :visible="openModalCommentaire" custom-class="modal-commentaire" :append-to-body="true">
+        <el-form>
+          <el-input :rows="10" type="textarea" v-model="commentaire" />
+          <el-button class="mt-3" size="small" :disabled="commentaire.trim() == '' " type="success"
+            @click="addCommentaire">Ajouter</el-button>
+        </el-form>
+      </el-dialog>
+
+      <el-dialog v-loading="modalBusy" :visible="openModalEdit" :fullscreen="true" :append-to-body="true" @close="openModalEdit = false">
         <header class="modal__header" slot="title">
           <div class="modal__header__title fs-2">
-            <i class="bi bi-images"></i>
+            <i class="el-icon-picture"></i>
             <span class="ms-3">Gérer les images</span>
           </div>
         </header>
         <ImagesSettingModal :images="images" :thumbnail="thumbnail" @change-thumbnail="thumbnail = $event"
           @change-images-order="imagesOrder = $event" @on-submit-setting-images="onSubmitSettingImages"
-          @close-modal="openModalEdit = false" :modalBusy="modalBusy" />
+          @close-modal="openModalEdit = false" />
       </el-dialog>
 
       <el-dialog v-if="openKakaoMap" :visible="openKakaoMap" :fullscreen="true" :append-to-body="true">
@@ -51,18 +77,20 @@
           :widthOptions="true" />
       </el-dialog>
       <el-button class="single-place__see-map" @click="openKakaoMap = true" circle type="success"
-        icon="el-icon-map-location"></el-button>
+        icon="el-icon-map-location">
+      </el-button>
     </div>
     <slot name="loading" v-else />
   </div>
 </template>
 
 <script>
-  import { getDoc, setDoc, updateDoc, doc, deleteDoc } from "firebase/firestore";
+  import { getDoc, getDocs, setDoc, updateDoc, doc, deleteDoc, addDoc, collection, query, where } from "firebase/firestore";
   import { auth, db, storage } from "~/plugins/firebase";
   import Introduction from "../../components/place/Introduction";
   import DiaporamaThumb from "../../components/place/DiaporamaThumb";
   import VuiModal from "~/components/vui-alpha/modal/VuiModal";
+  import Commentaires from '../../components/place/Commentaires'
   import {
     getDownloadURL,
     ref as storageRef,
@@ -85,7 +113,8 @@
       MapUiOptions,
       ImagesSettingModal,
       VuiModal,
-      Middleware
+      Middleware,
+      Commentaires
     },
 
     data() {
@@ -93,10 +122,14 @@
         place: null,
 
         images: null,
+        commentaires: [],
         thumbnail: null,
         imagesOrder: null,
 
         openModalEdit: false,
+        openModalCommentaire: false,
+
+        commentaire: '',
 
         carnet: null,
 
@@ -156,7 +189,7 @@
     },
 
     async created() {
-        await this.hydrateDataPlace();
+      await this.hydrateDataPlace();
     },
 
     methods: {
@@ -176,8 +209,7 @@
           this.busy = true
           this.place = this.places.find((place) => place.id === this.$route.params.id);
           let images = [];
-          if(this.place){
-
+          if (this.place) {
             for (const image of this.place.images) {
               const PICTURE_REF = storageRef(storage, "lieux/" + image);
               if (PICTURE_REF) {
@@ -192,12 +224,27 @@
             this.map.long = this.place.geopoint._long;
 
             this.carnet = Array.isArray(this.carnetPlace) ? this.carnetPlace : [];
+
+            await this.loadCommentaires()
+
           }
 
         } catch (error) {
           console.log(error)
-        }finally{
+        } finally {
           this.busy = false
+        }
+      },
+
+      async loadCommentaires() {
+        const commentairesRef = query(collection(db, "commentaires"), where('placeId', '==', this.$route.params.id))
+        let docs = await getDocs(commentairesRef)
+        if (!docs) {
+          return false
+        } else {
+          docs.forEach(doc => {
+              this.commentaires.push({...doc.data(), id: doc.id })
+          });
         }
       },
 
@@ -276,6 +323,26 @@
           this.modalBusy = false;
         }
       },
+
+      async addCommentaire() {
+        try {
+          this.modalBusy = true
+          await addDoc(collection(db, "commentaires"), {
+            placeId: this.$route.params.id,
+            user: auth.currentUser.uid,
+            content: this.commentaire,
+            created_at: new Date()
+          });
+          this.openModalCommentaire = false
+          this.$message.success("Commentaire ajouté")
+        } catch (error) {
+          console.log(error)
+        } finally {
+          this.modalBusy = false
+        }
+
+      }
+
     },
   };
 </script>
@@ -288,5 +355,14 @@
       right: 10px;
       bottom: 10px;
     }
+
+    &_commentaires:not(:last-child) {
+      margin-bottom: 10px;
+    }
+  }
+
+  ::v-deep .modal-commentaire {
+    width: 800px;
+    max-width: 90%;
   }
 </style>

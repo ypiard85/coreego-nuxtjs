@@ -1,5 +1,5 @@
 <template>
-  <div v-loading="modalBusy">
+  <div>
     <main class="modal__main mt-3" v-if="images">
       <section class="thumbnail__setting">
         <h3 class="border-bottom border-dark">Image de couverture</h3>
@@ -50,7 +50,6 @@
       >
       <el-button
         icon="el-icon-check"
-        :loading="modalmodalBusy"
         type="success"
         @click="$emit('on-submit-setting-images')"
         >Valider</el-button
@@ -71,10 +70,6 @@ export default {
     thumbnail: {
       type: String,
       required: true,
-    },
-    modalBusy: {
-      type: Boolean,
-      required: false,
     },
   },
 

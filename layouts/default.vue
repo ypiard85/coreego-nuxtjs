@@ -2,7 +2,7 @@
   <div>
     <template v-if="!busy">
       <navigation-bar :user="currentUser" />
-      <Nuxt>
+      <Nuxt class="mb-4">
         <template #loading>
           <loading-page />
         </template>
