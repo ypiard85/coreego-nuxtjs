@@ -20,6 +20,7 @@
   import NavigationBar from '~/pages/components/NavigationBar'
   import LoadingPage from '~/pages/components/LoadingPage'
   export default {
+    name: "layout",
     components: { NavigationBar, LoadingPage },
 
     data() {
@@ -69,7 +70,7 @@
             this.loadCities(),
             this.loadCategories(),
             this.loadUsers(),
-            this.loadPlaces()
+            this.loadPlaces(),
           ])
           if (this.currentUser) {
             await this.loadCarnet(this.currentUser.uid)

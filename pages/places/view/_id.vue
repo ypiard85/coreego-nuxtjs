@@ -1,5 +1,5 @@
 <template>
-  <div class="single-place">
+  <div class="place-view">
     <Middleware :viewPlace="true" />
     <div class="position-relative" v-if="place && !busy">
       <DiaporamaThumb :images="images" class="diapo" />
@@ -7,28 +7,12 @@
         <b-container fluid="md">
           <Introduction :place="place" :city="city" :category="category"
             @open-modal-setting-images="handleOpenModalSettingImages" @open-kakao-map="openKakaoMap = true"
-            @add-to-carnet="addPlaceToCarnet" @delete-to-carnet="deletePlaceToCarnet" />
-
-          <section class="mt-5" v-if="user">
-            <el-button v-if="!inCarnet" type="primary" @click="addPlaceToCarnet" :loading="loadingBtn"
-              icon="el-icon-plus">Carnet de route</el-button>
-            <el-button v-else type="danger" :loading="loadingBtn" @click="deletePlaceToCarnet"
-              icon="el-icon-minus">Carnet de route</el-button>
-            <el-dropdown @command="handleCommand" v-if="isAuthPlace" trigger="click">
-              <span class="el-dropdown-link">
-                <el-button type="info" class="ms-3" icon="el-icon-setting" circle></el-button>
-              </span>
-              <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item icon="el-icon-picture-outline" command="openModalPictureSetting">Gérer les
-                  photos</el-dropdown-item>
-                <el-dropdown-item icon="el-icon-edit" command="goToPlaceEditView">Modifier le lieu</el-dropdown-item>
-              </el-dropdown-menu>
-            </el-dropdown>
-          </section>
+            :inCarnet="inCarnet" :isAuthPlace="isAuthPlace" @add-to-carnet="addToCarnet"
+            @delete-to-carnet="deleteToCarnet" @command-button="handleCommand" :loadingBtn="loadingBtn" />
         </b-container>
       </section>
 
-      <section role="commentaires">
+      <!-- <section role="commentaires">
         <b-container>
           <h5 class="text-blue my-3">Commentaires (5) </h5>
           <el-button @click="openModalCommentaire = true" type="secondary" size="small" class="mb-3">
@@ -43,42 +27,29 @@
             </template>
           </Commentaires>
         </b-container>
-      </section>
+      </section> -->
 
-      <el-dialog v-loading="modalBusy" title="Ajouter un commentaire" @close="openModalCommentaire = false"
+      <!-- <el-dialog v-loading="modalBusy" title="Ajouter un commentaire" @close="openModalCommentaire = false"
         :visible="openModalCommentaire" custom-class="modal-commentaire" :append-to-body="true">
         <el-form>
           <el-input :rows="10" type="textarea" v-model="commentaire" />
           <el-button class="mt-3" size="small" :disabled="commentaire.trim() == '' " type="success"
             @click="addCommentaire">Ajouter</el-button>
         </el-form>
-      </el-dialog>
+      </el-dialog> -->
 
-      <el-dialog v-loading="modalBusy" :visible="openModalEdit" :fullscreen="true" :append-to-body="true" @close="openModalEdit = false">
-        <header class="modal__header" slot="title">
-          <div class="modal__header__title fs-2">
-            <i class="el-icon-picture"></i>
-            <span class="ms-3">Gérer les images</span>
-          </div>
-        </header>
-        <ImagesSettingModal :images="images" :thumbnail="thumbnail" @change-thumbnail="thumbnail = $event"
-          @change-images-order="imagesOrder = $event" @on-submit-setting-images="onSubmitSettingImages"
-          @close-modal="openModalEdit = false" />
-      </el-dialog>
+      <Modals :openModal="openModal" @close-modal="openModal = false; modalName = null"
+        :name="modalName"
+        :place="place"
+        :images="images"
+        :thumbnail="thumbnail"
+        @load-place="loadPlaces"
+        />
 
-      <el-dialog v-if="openKakaoMap" :visible="openKakaoMap" :fullscreen="true" :append-to-body="true">
-        <KakaoMap v-if="openKakaoMap" id="mapmarker" @change-type="
-            map.type = $event;
-            reloadMap();
-          " @change-mode="
-            map.mode = $event;
-            reloadMap();
-          " @close-map="openKakaoMap = false" :lat="map.lat" :long="map.long" :mapType="map.type" :mapMode="map.mode"
-          :widthOptions="true" />
-      </el-dialog>
-      <el-button class="single-place__see-map" @click="openKakaoMap = true" circle type="success"
+      <el-button class="place-view__see-map" @click="openModal = true; modalName = 'kakaomap' " circle type="success"
         icon="el-icon-map-location">
       </el-button>
+
     </div>
     <slot name="loading" v-else />
   </div>
@@ -103,7 +74,7 @@
   import ImagesSettingModal from "~/components/modal/ImagesSettingModal";
   import { getImageUrl } from '~/utils/request.js'
   import Middleware from '~/pages/components/Middleware'
-
+  import Modals from '~/pages/components/place/Modals'
   export default {
     name: "place",
     components: {
@@ -114,6 +85,7 @@
       ImagesSettingModal,
       VuiModal,
       Middleware,
+      Modals,
       Commentaires
     },
 
@@ -122,12 +94,11 @@
         place: null,
 
         images: null,
-        commentaires: [],
-        thumbnail: null,
-        imagesOrder: null,
 
-        openModalEdit: false,
-        openModalCommentaire: false,
+        commentaires: [],
+
+        openModal: false,
+        modalName: null,
 
         commentaire: '',
 
@@ -137,15 +108,6 @@
         busy: false,
 
         loadingBtn: false,
-        openKakaoMap: false,
-
-        map: {
-          lat: null,
-          long: null,
-          type: 0,
-          mode: 2,
-          reload: false,
-        },
       };
     },
 
@@ -200,7 +162,8 @@
         if (command === "goToPlaceEditView") {
           this.$router.replace('/places/edit/' + this.place.id);
         } else if (command === "openModalPictureSetting") {
-          this.openModalEdit = true;
+          this.openModal = true;
+          this.modalName = 'gestionImages'
         }
       },
 
@@ -220,8 +183,6 @@
             }
             this.images = images;
             this.thumbnail = this.place.thumbnail;
-            this.map.lat = this.place.geopoint._lat;
-            this.map.long = this.place.geopoint._long;
 
             this.carnet = Array.isArray(this.carnetPlace) ? this.carnetPlace : [];
 
@@ -243,7 +204,7 @@
           return false
         } else {
           docs.forEach(doc => {
-              this.commentaires.push({...doc.data(), id: doc.id })
+            this.commentaires.push({ ...doc.data(), id: doc.id })
           });
         }
       },
@@ -260,14 +221,7 @@
         this.loading = false;
       },
 
-      reloadMap() {
-        this.openKakaoMap = false;
-        this.$nextTick(() => {
-          this.openKakaoMap = true;
-        });
-      },
-
-      async addPlaceToCarnet() {
+      async addToCarnet() {
         try {
           this.loadingBtn = true;
           this.carnet.push(this.$route.params.id);
@@ -283,7 +237,7 @@
         }
       },
 
-      async deletePlaceToCarnet() {
+      async deleteToCarnet() {
         try {
           this.loadingBtn = true;
           this.carnet = this.carnet.filter((placeId) => placeId != this.$route.params.id);
@@ -296,31 +250,6 @@
           console.log(e);
         } finally {
           this.loadingBtn = false;
-        }
-      },
-
-      async onSubmitSettingImages() {
-        try {
-          this.modalBusy = true;
-          const ref = doc(db, "lieux", this.$route.params.id);
-
-          let thumbnailUrl = this.place.thumbnailUrl
-          if (this.thumbnail !== this.place.thumbnail) {
-            thumbnailUrl = await getImageUrl(this.thumbnail)
-          }
-          await updateDoc(ref, {
-            images: this.imagesOrder,
-            thumbnail: this.thumbnail,
-            thumbnailUrl: thumbnailUrl
-          })
-          await this.loadPlaces();
-          this.$message.success("Images mis à jour");
-          this.openModalEdit = false;
-
-        } catch (error) {
-          this.$message.error("Une erreur est survenue");
-        } finally {
-          this.modalBusy = false;
         }
       },
 
@@ -348,7 +277,7 @@
 </script>
 
 <style lang="scss" scoped>
-  .single-place {
+  .place-view {
     &__see-map {
       font-size: 24px;
       position: fixed;
