@@ -1,52 +1,26 @@
 <template>
   <div class="place-view">
     <Middleware :viewPlace="true" />
-    <div class="position-relative" v-if="place && !busy">
+    <div class="position-relative" v-if="!busy">
       <DiaporamaThumb :images="images" class="diapo" />
       <section class="position-relative bg-light py-3">
         <b-container fluid="md">
-          <Introduction :place="place" :city="city" :category="category"
-            @open-modal-setting-images="handleOpenModalSettingImages" @open-kakao-map="openKakaoMap = true"
+          <Introduction :place="place" :city="city" :category="category" @open-kakao-map="openKakaoMap = true"
             :inCarnet="inCarnet" :isAuthPlace="isAuthPlace" @add-to-carnet="addToCarnet"
             @delete-to-carnet="deleteToCarnet" @command-button="handleCommand" :loadingBtn="loadingBtn" />
         </b-container>
       </section>
 
-      <!-- <section role="commentaires">
+      <section role="commentaires">
         <b-container>
-          <h5 class="text-blue my-3">Commentaires (5) </h5>
-          <el-button @click="openModalCommentaire = true" type="secondary" size="small" class="mb-3">
-            Ajouter un commentaire
-          </el-button>
-          <Commentaires class="single-place_commentaires">
-            <template #edit>
-              <div class="float-end">
-                <el-button type="text" class="me-1" icon="el-icon-edit"></el-button>
-                <el-button class="text-danger" type="text" icon="el-icon-delete-solid"></el-button>
-              </div>
-            </template>
-          </Commentaires>
+          <Comment @open-modal="modal = $event" :comments="comments" @load-comments="loadCommentaires" />
         </b-container>
-      </section> -->
+      </section>
 
-      <!-- <el-dialog v-loading="modalBusy" title="Ajouter un commentaire" @close="openModalCommentaire = false"
-        :visible="openModalCommentaire" custom-class="modal-commentaire" :append-to-body="true">
-        <el-form>
-          <el-input :rows="10" type="textarea" v-model="commentaire" />
-          <el-button class="mt-3" size="small" :disabled="commentaire.trim() == '' " type="success"
-            @click="addCommentaire">Ajouter</el-button>
-        </el-form>
-      </el-dialog> -->
+      <Modals :modal="modal" @close-modal="closeModal" :place="place" :images="images"
+        :thumbnail="thumbnail" @load-place="hydrateDataPlace" @load-comments="loadCommentaires" />
 
-      <Modals :openModal="openModal" @close-modal="openModal = false; modalName = null"
-        :name="modalName"
-        :place="place"
-        :images="images"
-        :thumbnail="thumbnail"
-        @load-place="loadPlaces"
-        />
-
-      <el-button class="place-view__see-map" @click="openModal = true; modalName = 'kakaomap' " circle type="success"
+      <el-button class="place-view__see-map" @click="modal.open = true, modal.name = 'kakaomap' " circle type="success"
         icon="el-icon-map-location">
       </el-button>
 
@@ -56,12 +30,12 @@
 </template>
 
 <script>
-  import { getDoc, getDocs, setDoc, updateDoc, doc, deleteDoc, addDoc, collection, query, where } from "firebase/firestore";
+  import { getDoc, getDocs, setDoc, updateDoc, doc, deleteDoc, addDoc, collection, query, where, orderBy } from "firebase/firestore";
   import { auth, db, storage } from "~/plugins/firebase";
   import Introduction from "../../components/place/Introduction";
   import DiaporamaThumb from "../../components/place/DiaporamaThumb";
   import VuiModal from "~/components/vui-alpha/modal/VuiModal";
-  import Commentaires from '../../components/place/Commentaires'
+  import Comment from '../../components/place/Comment'
   import {
     getDownloadURL,
     ref as storageRef,
@@ -86,7 +60,7 @@
       VuiModal,
       Middleware,
       Modals,
-      Commentaires
+      Comment
     },
 
     data() {
@@ -95,10 +69,13 @@
 
         images: null,
 
-        commentaires: [],
+        comments: [],
 
-        openModal: false,
-        modalName: null,
+        modal: {
+          open: false,
+          name: null,
+          title: null
+        },
 
         commentaire: '',
 
@@ -145,9 +122,11 @@
           (category) => category.id === this.place.category
         );
       },
+
       city() {
         return this.cities.find((city) => city.id === this.place.city);
       },
+
     },
 
     async created() {
@@ -157,22 +136,34 @@
     methods: {
       ...mapActions("app", ["loadPlaces", 'loadCarnet']),
 
+      closeModal() {
+        this.modal = {
+          open: false,
+          name: null,
+          title: null
+        }
+      },
+
       handleCommand(command) {
-        console.log(command);
         if (command === "goToPlaceEditView") {
           this.$router.replace('/places/edit/' + this.place.id);
         } else if (command === "openModalPictureSetting") {
-          this.openModal = true;
-          this.modalName = 'gestionImages'
+          this.modal.open = true
+          this.modal.name = "gestionImages"
         }
       },
 
       async hydrateDataPlace() {
         try {
           this.busy = true
-          this.place = this.places.find((place) => place.id === this.$route.params.id);
+
+          const docRef = doc(db, "lieux", this.$route.params.id);
+          const docSnap = await getDoc(docRef)
+          this.place = docSnap.data();
+
           let images = [];
           if (this.place) {
+            this.place.user = this.users.find(user => user.localId === this.place.user)
             for (const image of this.place.images) {
               const PICTURE_REF = storageRef(storage, "lieux/" + image);
               if (PICTURE_REF) {
@@ -198,27 +189,17 @@
       },
 
       async loadCommentaires() {
-        const commentairesRef = query(collection(db, "commentaires"), where('placeId', '==', this.$route.params.id))
+        const commentairesRef = query(collection(db, "commentaires"), where('placeId', '==', this.$route.params.id),  orderBy('created_at', 'desc'))
         let docs = await getDocs(commentairesRef)
         if (!docs) {
           return false
         } else {
+          let comments = []
           docs.forEach(doc => {
-            this.commentaires.push({ ...doc.data(), id: doc.id })
+            comments.push({ ...doc.data(), id: doc.id })
           });
+          this.comments = comments
         }
-      },
-
-      handleOpenModalSettingImages() {
-        this.$refs.modalSettingImages.openModal();
-      },
-
-      loadingTrue() {
-        this.loading = true;
-      },
-
-      loadingFalse() {
-        this.loading = false;
       },
 
       async addToCarnet() {
@@ -252,26 +233,6 @@
           this.loadingBtn = false;
         }
       },
-
-      async addCommentaire() {
-        try {
-          this.modalBusy = true
-          await addDoc(collection(db, "commentaires"), {
-            placeId: this.$route.params.id,
-            user: auth.currentUser.uid,
-            content: this.commentaire,
-            created_at: new Date()
-          });
-          this.openModalCommentaire = false
-          this.$message.success("Commentaire ajouté")
-        } catch (error) {
-          console.log(error)
-        } finally {
-          this.modalBusy = false
-        }
-
-      }
-
     },
   };
 </script>
@@ -284,14 +245,5 @@
       right: 10px;
       bottom: 10px;
     }
-
-    &_commentaires:not(:last-child) {
-      margin-bottom: 10px;
-    }
-  }
-
-  ::v-deep .modal-commentaire {
-    width: 800px;
-    max-width: 90%;
   }
 </style>
