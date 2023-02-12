@@ -45,7 +45,7 @@
               <div class="d-flex align-items-center">
                 <el-select name="Catégorie" class="w-100" remote="remote" :value="category" @input="onChangeCategory"
                   clearable="clearable" placeholder="Selectioner une catégorie">
-                  <el-option v-for="category in categories" :key="category.id" :label="category.label"
+                  <el-option v-for="category in categories" :key="category.id" :label="category.name"
                     :value="category.id"></el-option>
                 </el-select>
                 <!-- <vui-bullet :color="colorCategory" v-if="colorCategory" class="ms-3"/> -->
@@ -106,7 +106,7 @@
       },
 
       categoryName(){
-        return this.category ? this.categories.find(category => category.id == this.category).label : null
+        return this.category ? this.categories.find(category => category.id == this.category).name : null
       },
 
     },
@@ -129,6 +129,7 @@
       },
 
       onChangeCategory($event) {
+        console.log($event)
         this.category = $event
         $event === '' && (this.category = null)
         this.$emit('change-category', this.category)

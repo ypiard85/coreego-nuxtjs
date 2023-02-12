@@ -46,18 +46,14 @@
 
     methods: {
       async loadPlaces() {
-        console.log(Array.isArray(this.carnets), this.carnets)
-        if(Array.isArray(this.carnets)){
+        if(Array.isArray(this.carnets) && this.carnets.length > 0 ){
           let placesStore = this.placesStore.filter((place) => this.carnets.includes(place.id));
           let places = [];
           for (let place of placesStore) {
-            const PICTURE_REF = storageRef(storage, "lieux/" + place.thumbnail);
-            const PICTURE = await getDownloadURL(PICTURE_REF);
-
             places.push({
               ...place,
               cityName: this.cities.find(city => city.id === place.city).label,
-              categoryName: this.categories.find(category => category.id === place.category).label
+              categoryName: this.categories.find(category => category.id === place.category).name
             });
           }
           this.places = places;

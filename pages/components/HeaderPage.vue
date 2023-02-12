@@ -10,7 +10,7 @@
 
 <script>
   export default{
-    name: "header",
+    name: "headerPage",
     props:{
       isEditMode:{
         type: Boolean,

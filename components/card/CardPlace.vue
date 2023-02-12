@@ -9,7 +9,7 @@
           <span class="fw-bold text-blue">{{place.user.displayName}}</span>
         </div>
         <el-image
-          :src="place.thumbnailUrl"
+          :src="place.thumbnail.url"
           fit="cover"
           style="height: 200px; width: 100%"
         />
@@ -23,7 +23,7 @@
                 <i class="el-icon-location-outline"></i>
                 {{ city.label }}</p
               >
-              <vui-tag :color="category.color" :label="category.label" />
+              <vui-tag :color="category.color" :label="category.name" />
             </div>
             <div class="mt-2">
                 <small>{{ timeAgo }} </small>
@@ -64,6 +64,7 @@
       category(){
         return this.categories.find(category => category.id === this.place.category)
       },
+
       city(){
         return this.cities.find(city => city.id === this.place.city)
       },

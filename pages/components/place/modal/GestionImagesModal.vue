@@ -8,8 +8,8 @@
       </div>
     </header>
 
-    <GestionImages :images="images" :thumbnail="thumbnail" @change-thumbnail="thumbnailValue = $event"
-      @change-images-order="imagesOrder = $event" @on-submit-setting-images="onSubmitSettingImages"
+    <GestionImages :place="place" @change-thumbnail="thumbnailValue = $event"
+      @change-images-order="imagesOrder = $event" @on-submit-setting-images="onSubmitSettingImages($event)"
       @close-modal="$emit('close-modal')" />
 
   </div>
@@ -27,13 +27,6 @@
     components: { GestionImages },
 
     props: {
-      images: {
-        type: Array,
-      },
-      thumbnail: {
-        type: String,
-        required: true,
-      },
       place: {
         type: Object,
         required: true
@@ -42,32 +35,21 @@
 
     data() {
       return {
-        imagesOrder: null,
-        thumbnailValue: null
+        images: null,
+        thumbnail: null
       }
     },
 
-    created() {
-      this.thumbnailValue = this.thumbnail
-      this.imagesOrder = this.images
-    },
-
     methods: {
-      async onSubmitSettingImages() {
+      async onSubmitSettingImages($event) {
         try {
+
           this.$emit('modal-busy', true)
           const ref = doc(db, "lieux", this.$route.params.id);
 
-          let thumbnailUrl = this.place.thumbnailUrl
-          if (this.thumbnailValue !== this.place.thumbnail) {
-            thumbnailUrl = await getImageUrl(this.thumbnailValue)
-          }
           await updateDoc(ref, {
-            images: this.imagesOrder.map((image) => {
-              return image.name;
-            }),
-            thumbnail: this.thumbnailValue,
-            thumbnailUrl: thumbnailUrl
+            images: $event.images,
+            thumbnail: $event.thumbnail,
           })
           this.$emit('load-place')
           this.$message.success("Images mis à jour");

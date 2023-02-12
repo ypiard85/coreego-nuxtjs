@@ -1,5 +1,5 @@
 <template>
-  <el-dropdown @command="$emit('command-button', $event)" v-if="isAuthPlace" trigger="click">
+  <el-dropdown @command="$emit('command-button', $event)" trigger="click">
     <span class="el-dropdown-link">
       <el-button type="info" class="ms-3" icon="el-icon-setting" circle></el-button>
     </span>
@@ -14,15 +14,5 @@
 <script>
   export default {
     name: 'settingDropdown',
-
-    props: {
-      isAuthPlace: {
-        type: Boolean,
-        required: true,
-        default: false,
-      },
-    }
-
-
   }
 </script>

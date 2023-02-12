@@ -58,7 +58,7 @@
                   v-for="categoriesOption in categoriesOptions"
                   :key="categoriesOption.id"
                   :value="categoriesOption.id"
-                  :label="categoriesOption.label"
+                  :label="categoriesOption.name"
                 />
               </el-select>
             </el-form-item>
@@ -316,7 +316,6 @@ export default {
         category: null,
         images: [],
         thumbnail: null,
-        thumbnailUrl: null,
         description: null,
       };
 
@@ -327,12 +326,8 @@ export default {
         formData.city = this.place.city;
         formData.category = this.place.category;
         formData.description = this.place.description;
-        formData.thumbnailUrl = this.place.thumbnail
-        for (let image of this.place.images) {
-          const PICTURE_REF = storageRef(storage, "lieux/" + image);
-          const PICTURE = await getDownloadURL(PICTURE_REF);
-          formData.images.push({ name: image, url: PICTURE });
-        }
+        formData.thumbnail = this.place.thumbnail
+        formData.images = this.place.images
       } else {
         formData.title = "";
         formData.latitude = "";
@@ -361,10 +356,16 @@ export default {
                 let fileName =
                   this.user.uid +
                   Math.floor(Math.random() * (80000 - 1000) + 1000);
-                images.push(fileName);
-                //upload images
-                const FILES_REF = storageRef(storage, "lieux/" + fileName);
-                await uploadBytesResumable(FILES_REF, preview.file);
+                  //upload images
+                  const FILES_REF = storageRef(storage, "lieux/" + fileName);
+                  await uploadBytesResumable(FILES_REF, preview.file);
+
+                  const IMG_URL = await getImageUrl(fileName)
+
+                  images.push({
+                    name: fileName,
+                    url: IMG_URL
+                  });
               }
             }
 
@@ -373,8 +374,6 @@ export default {
               let formData = this.formData();
               formData.images = images;
               formData.thumbnail = images[0];
-
-              formData.thumbnailUrl = await getImageUrl(formData.thumbnail)
 
               await addDoc(collection(db, "lieux"), formData);
               await this.loadPlaces();
@@ -395,34 +394,26 @@ export default {
 
               let formData = this.formData();
 
-              formData.images = this.form.images
-                .map((image) => {
-                  return image.name;
-                })
-                .concat(images);
+              formData.images = this.form.images.concat(images);
               formData.images;
               let findThumbnail = formData.images.find(
-                (image) => image.name === this.place.thumbnail
+                (image) => image.name === this.place.thumbnail.name
               );
-              if (findThumbnail) {
-                formData.thumbnail = findThumbnail.name;
-                formData.thumbnailUrl = this.form.thumbnailUrl
-              } else {
+
+              if (!findThumbnail) {
                 formData.thumbnail = formData.images[0];
-                formData.thumbnailUrl = await getImageUrl(formData.thumbnail)
+              }else{
+                formData.thumbnail = this.place.thumbnail
               }
 
-                await setDoc(doc(db, "lieux", this.$route.params.id), formData);
-                this.$message.success("Lieu modifié");
+              await setDoc(doc(db, "lieux", this.$route.params.id), formData);
+              this.$message.success("Lieu modifié");
               await this.loadPlaces();
               this.$router.replace('/places/view/' + this.place.id)
             }
           } catch (error) {
-            if (!this.isEditMode) {
-              this.$notify.error(error);
-            } else {
               this.$message.error(error);
-            }
+              console.log(error)
           } finally {
             this.busy = false;
           }

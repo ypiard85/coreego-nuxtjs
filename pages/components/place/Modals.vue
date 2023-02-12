@@ -5,20 +5,20 @@
     <template v-if="modal.name">
       <template v-if="modal.name == 'gestionImages' ">
         <GestionImagesModal
-        :images="images"
         :place="place"
-        :thumbnail="thumbnail" @modal-busy="busy = $event"
+        @modal-busy="busy = $event"
         @close-modal="$emit('close-modal')"
-        @load-place="$emit('load-place') "
+        @load-place="$emit('load-place', $event) "
         />
       </template>
 
     <template v-if="modal.name == 'kakaomap' && modal.open ">
-      <KakaoModal :place="place" @close-modal="$emit('close-modal')" />
+      <KakaoModal :place="place"  @close-modal="$emit('close-modal')" />
     </template>
 
     <template v-if="modal.name == 'comment' && modal.open ">
         <CommentModal
+        :placeUser="place.user"
         @modal-busy="busy = $event"
         @close-modal="$emit('close-modal')"
         @load-comments="$emit('load-comments')"
@@ -37,13 +37,6 @@
     name: 'modals',
     components: { GestionImagesModal, KakaoModal,CommentModal },
     props: {
-      images: {
-        type: Array,
-      },
-      thumbnail: {
-        type: String,
-        required: true,
-      },
       place:{
         type: Object,
         required: true

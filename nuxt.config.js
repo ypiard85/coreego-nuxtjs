@@ -92,6 +92,20 @@ export default {
     // https://go.nuxtjs.dev/content
     '@nuxt/content',
     'bootstrap-vue/nuxt',
+
+    ['nuxt-mail', {
+      smtp: {
+        service: 'gmail',
+        auth: {
+          user: 'contact@coreego.fr',
+          pass: '<Hyun@kim85>',
+        },
+      },
+      message:{
+        name: 'rien', to: 'yoann.piard@gmail.com'
+      }
+    }],
+
   ],
 
   bootstrapVue: {

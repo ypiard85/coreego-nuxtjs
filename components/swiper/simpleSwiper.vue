@@ -4,11 +4,11 @@
         <div class="swiper-wrapper">
           <!-- Slides -->
           <nuxt-link :to=" '/places/view/' + place.id " class="swiper-slide shadow" v-for="place in placesRandom">
-            <el-image fit="cover" :src="place.thumbnailUrl"></el-image>
+            <el-image fit="cover" :src="place.thumbnail.url"></el-image>
             <strong class="d-block text-truncate text-dark">{{ place.title }} </strong>
             <div class="d-flex">
               <p class="me-2 text-secondary"><i class="el-icon-location-outline"></i>{{ city(place.city).label }}</p>
-              <vui-tag :color="category(place.category).color" :label="category(place.category).label" />
+              <vui-tag :color="category(place.category).color" :label="category(place.category).name" />
             </div>
           </nuxt-link>
         </div>

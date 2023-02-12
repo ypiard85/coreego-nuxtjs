@@ -76,7 +76,7 @@ export const initMultiMarker = (id, places) => {
       '</div>' +
       '        <div class="body">' +
       '            <div class="img">' +
-      `               <img src="${place.thumbnailUrl}">` +
+      `               <img src="${place.thumbnail.url}">` +
       '           </div>' +
       '            <div class="desc">' +
       '                <div class="ellipsis">' +

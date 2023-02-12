@@ -116,14 +116,12 @@ export default {
             throw new Error("Erreur lors du chargement des catégories");
           }
           docs.forEach((doc) => {
-            let categories = doc.data().names.map((category, index) => {
-              return {id: index + 1, label: category, color: COLOR_ACTIVITY[index]}
-            })
+            let categories = doc.data().categories
 
             categories = categories.sort(function(a,b){
-              if(a.label > b.label){
+              if(a.name > b.name){
                 return 1
-              }else if(a.label < b.label){
+              }else if(a.name < b.name){
                 return -1
               }
             })

@@ -4,7 +4,7 @@
     <section v-if="places.length > 0">
       <b-container>
         <p class="label h5 mb-3">Quelques lieux :</p>
-        <simple-swiper :max="6" :slidesPerView="3" :spaceBetween="30" :navigation="false" :pagination="true" :delay="3000" />
+        <simple-swiper :max="maxPlace" :slidesPerView="3" :spaceBetween="30" :navigation="false" :pagination="true" :delay="3000" />
       </b-container>
     </section>
     <!-- <AboutUs :categories="categories" /> -->
@@ -21,7 +21,12 @@
     components: { HomeHeader, AboutUs, SimpleSwiper },
 
     computed: {
-      ...mapGetters('app', { categories: 'getCategories', places: 'getPlaces' })
+      ...mapGetters('app', { categories: 'getCategories', places: 'getPlaces' }),
+
+      maxPlace(){
+        return this.places.length > 6 ? 6 : this.places.length
+      }
+
     }
 
   }
