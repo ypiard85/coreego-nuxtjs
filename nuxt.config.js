@@ -3,6 +3,10 @@ import fs from 'fs'
 
 export default {
   // Disable server-side rendering: https://go.nuxtjs.dev/ssr-mode
+
+
+  //Envoyer des notifications
+  // https://yuhanna.medium.com/how-to-add-push-notification-to-your-nuxt-js-web-app-using-firebase-abf12f19a67b
   ssr: false,
 
   meta: { layout: 'layoutApp' },
@@ -35,7 +39,10 @@ export default {
     ],
     link: [
       { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
-      { rel: 'stylesheet', href: 'https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.css' },
+      {
+        rel: 'stylesheet',
+        href: 'https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.css',
+      },
     ],
   },
 
@@ -92,20 +99,6 @@ export default {
     // https://go.nuxtjs.dev/content
     '@nuxt/content',
     'bootstrap-vue/nuxt',
-
-    ['nuxt-mail', {
-      smtp: {
-        service: 'gmail',
-        auth: {
-          user: 'contact@coreego.fr',
-          pass: '<Hyun@kim85>',
-        },
-      },
-      message:{
-        name: 'rien', to: 'yoann.piard@gmail.com'
-      }
-    }],
-
   ],
 
   bootstrapVue: {
@@ -122,6 +115,7 @@ export default {
 
   // Content module configuration: https://go.nuxtjs.dev/config-content
   content: {},
+
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {

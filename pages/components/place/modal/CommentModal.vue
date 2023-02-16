@@ -37,6 +37,7 @@
               content: this.comment,
               created_at: new Date()
             });
+
             this.$message.success("Commentaire ajouté")
             this.$emit('load-comments')
             this.$emit('close-modal')
