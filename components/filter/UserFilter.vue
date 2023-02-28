@@ -1,5 +1,6 @@
 <template>
-  <el-select no-data-text ="Aucun utilisateur trouvé" v-model="value" @clear="options = [], $emit('clear-tag')" @change="$emit('change', $event)" clearable="clearable" filterable="filterable" remote="remote"
+  <el-select no-data-text="Aucun utilisateur trouvé" v-model="value" @clear="options = [], $emit('clear-tag')"
+    @change="$emit('change', $event)" clearable="clearable" filterable="filterable" remote="remote"
     reserve-keyword="reserve-keyword" placeholder="Entrez un utilisateur" :remote-method="remoteMethod"
     :loading="loading">
     <el-option style="height: 100%" class="filter_user_option" v-for="user in options" :key="user.localId"
@@ -11,13 +12,13 @@
 </template>
 
 <script>
-  import {mapGetters} from 'vuex'
+  import { mapGetters } from 'vuex'
 
   export default {
     name: 'userFilter',
 
     props: {
-      userName:{
+      userName: {
         required: false
       }
     },
@@ -31,13 +32,16 @@
       }
     },
 
-    computed:{
+    computed: {
       ...mapGetters('app', { users: 'getUsers' })
+    },
+
+    created(){
+      this.value = this.userName
     },
 
     mounted() {
       this.list = [...this.users]
-      this.value = this.userName
     },
 
     methods: {
