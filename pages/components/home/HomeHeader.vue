@@ -1,8 +1,8 @@
 <template>
   <header class="d-flex align-items-center" :style="{ 'background-image' : 'url(' + IMG_HOME_PAGE_HEADER + ')' }">
-    <b-container class="d-flex flex-column align-items-center justify-content-between">
-      <div class="header-title shadow rounded">
-        <h2 class="text-center w-100 text-white">
+    <b-container>
+      <div class="header-title">
+        <h2 class="text-white">
           Découvrir la Corée Du Sud n'a jamais été aussi facile
         </h2>
       </div>
@@ -29,18 +29,15 @@
 
 <style lang="scss" scoped>
   header {
-    height: 60vh;
+    height: 50vh;
+    width: 100%;
     background-repeat: no-repeat;
     background-size: cover;
-    background-position: center;
-    backdrop-filter: blur(5px);
+    background-position: bottom;
 
     .header-title {
       width: 500px;
       max-width: 100%;
-      margin: auto;
-      background: $blue-principal;
-      padding: 10px;
     }
 
     h2 {

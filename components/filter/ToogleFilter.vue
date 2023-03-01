@@ -1,5 +1,5 @@
 <template>
-  <el-button :size="size" @click="$emit('click')">
+  <el-button :size="size" @click="$emit('click')" class="toogle-button">
     {{label}}
   </el-button>
 </template>
@@ -18,7 +18,7 @@
       size: {
         type: String,
         required: false,
-        default: 'small'
+        default: 'medium'
       }
     },
   }

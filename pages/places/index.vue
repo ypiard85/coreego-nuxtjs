@@ -4,12 +4,10 @@
     <filter-places
       v-if="filter"
       @change-search-value="search = $event"
-      @filter-by-alphabet="byAlphabet = $event, handleFilterByAlphabet()"
-      @filter-by-date="byDate = $event, handleFilterByDate()"
+      @filter-by-date="byDate = $event"
       @filter-by-city="byCity = $event"
       @filter-by-category="byCategory = $event"
       @filter-by-user="byUser = $event"
-      :byAlphabet="byAlphabet"
       :byDate="byDate"
       :byCity="byCity"
       :byCategory="byCategory"
@@ -17,7 +15,7 @@
     />
     <!-- Conent -->
     <b-container fluid="sm" v-if="places">
-      <template v-if="searchFilter.length > 0">
+      <template v-if="places.length > 0">
         <el-row :gutter="10">
           <el-col
             :xs="24"
@@ -25,7 +23,7 @@
             :md="12"
             :lg="8"
             class="mb-2"
-            v-for="(place, i) in filteredPlaces"
+            v-for="(place, i) in places"
             :key="i"
           >
             <card-place :place="place" />
@@ -71,7 +69,6 @@ export default {
       byUser: null,
 
       busy: false,
-      places: null,
     }
   },
 
@@ -83,21 +80,14 @@ export default {
       usersStore: 'getUsers',
     }),
 
-    searchFilter() {
-      return (
-        this.places &&
-        this.places.filter((place) =>
-          place.title.toLowerCase().includes(this.search.toLowerCase())
-        )
-      )
-    },
+    places() {
+      let places = [...this.placesStore]
 
-    filteredPlaces() {
-      let places = [...this.places]
-
-      places = places.filter((place) =>
+      if(this.search.length > 0){
+        places = places.filter((place) =>
         place.title.toLowerCase().includes(this.search.toLowerCase())
-      )
+        )
+      }
 
       if (this.byCity) {
         places = places.filter((place) => place.city === this.byCity)
@@ -115,48 +105,26 @@ export default {
         )
       }
 
-      return places
-    },
-  },
-
-  async created() {
-    this.places = [...this.placesStore]
-  },
-
-  methods: {
-    ...mapActions('app', ['loadPlaces']),
-
-    handleFilterByAlphabet() {
-      if (this.byAlphabet) {
-        this.places.sort(function (a, b) {
-          if (a.title < b.title) {
-            return -1
-          }
-        })
-      } else if (!this.byAlphabet) {
-        this.filteredPlaces.sort(function (a, b) {
-          if (a.title > b.title) {
-            return -1
-          }
-        })
-      }
-    },
-
-    handleFilterByDate() {
       if (this.byDate) {
-        this.places.sort(function (a, b) {
+        places = places.sort(function (a, b) {
           if (a.created_at > b.created_at) {
             return -1
           }
         })
       } else if (!this.byDate) {
-        this.filteredPlaces.sort(function (a, b) {
+        places = places.sort(function (a, b) {
           if (a.created_at < b.created_at) {
             return -1
           }
         })
       }
+
+      return places
     },
+  },
+
+  methods: {
+    ...mapActions('app', ['loadPlaces']),
   },
 }
 </script>

@@ -1,7 +1,7 @@
 <template>
-  <el-select no-data-text="Aucun utilisateur trouvé" v-model="value" @clear="options = [], $emit('clear-tag')"
+  <el-select id="user" no-data-text="Aucun utilisateur trouvé" v-model="value" @clear="options = [], $emit('clear-tag')"
     @change="$emit('change', $event)" clearable="clearable" filterable="filterable" remote="remote"
-    reserve-keyword="reserve-keyword" placeholder="Entrez un utilisateur" :remote-method="remoteMethod"
+    reserve-keyword="reserve-keyword" placeholder="Selectionner un utilisateur" :remote-method="remoteMethod"
     :loading="loading">
     <el-option style="height: 100%" class="filter_user_option" v-for="user in options" :key="user.localId"
       :label="user.displayName" :value="user.localId">

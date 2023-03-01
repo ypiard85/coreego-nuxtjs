@@ -56,16 +56,16 @@
                             <nuxt-link :to="'/places/view/' + place.id " :underline="false"
                                 v-for="(place, i) in placeAll(5)" :key="i"
                                 class="profil--places-published__content p-2">
-                                <div class="d-flex align-items-center w-100">
-                                    <el-image :src="place.thumbnailUrl" class="rounded me-3" fit="cover"></el-image>
-                                    <div class="profil--places-published__content--title">
-                                        <p class="fs-6 mb-1 fw-bold">{{ place.title }}</p>
+                                <div class="d-flex align-items-center mw-100">
+                                    <el-image :src="place.thumbnail.url" class="rounded me-3" fit="cover"></el-image>
+                                    <div class="profil--places-published__content--title" style="min-width: 0">
+                                        <span class="fs-6 mb-1  fw-bold d-block text-truncate">{{ place.title }}</span>
                                         <div class="d-flex align-items-center">
-                                            <p class="m-0 p-0 me-3">
+                                            <span class=" me-3">
                                                 <i class="el-icon-location-outline" />
                                                 {{ city(place.city).label }}
-                                            </p>
-                                            <vui-tag :label="category(place.category).label"
+                                            </span>
+                                            <vui-tag :label="category(place.category).name"
                                                 :color="category(place.category).color" />
                                         </div>
                                     </div>
@@ -230,7 +230,7 @@
                         this.about = res.about
                     }
 
-                }).catch((error) => console.log(error));
+                }).catch((error) => console.log('redirection home'));
             },
 
             changeFile(image, sectionEdit) {
@@ -239,7 +239,7 @@
                         file: res,
                         url: URL.createObjectURL(res)
                     };
-                    this.$bvModal.msgBoxConfirm("Voullez vous modifier cette image? ", {
+                    this.$bvModal.msgBoxConfirm("Voullez vous modifier cette image ? ", {
                         size: "sm",
                         buttonSize: "sm",
                         okVariant: "success",
@@ -428,7 +428,6 @@
                     background: $gray-light;
                 }
 
-                &--title {}
             }
         }
 
