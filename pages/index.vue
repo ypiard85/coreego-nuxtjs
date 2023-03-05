@@ -1,12 +1,12 @@
 <template>
   <div class="home-page">
     <HomeHeader />
-    <section v-if="places.length > 0">
+    <!-- <section v-if="places.length > 0">
       <b-container>
         <p class="label h5 mb-3">Quelques lieux :</p>
         <simple-swiper :max="maxPlace" :slidesPerView="3" :spaceBetween="30" :navigation="false" :pagination="true" :delay="3000" />
       </b-container>
-    </section>
+    </section> -->
     <!-- <AboutUs :categories="categories" /> -->
   </div>
 </template>
@@ -23,9 +23,9 @@
     computed: {
       ...mapGetters('app', { categories: 'getCategories', places: 'getPlaces' }),
 
-      maxPlace(){
-        return this.places.length > 6 ? 6 : this.places.length
-      }
+      // maxPlace(){
+      //   return this.places.length > 6 ? 6 : this.places.length
+      // }
 
     }
 

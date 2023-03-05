@@ -1,8 +1,8 @@
 <template>
-  <el-select id="user" no-data-text="Aucun utilisateur trouvé" v-model="value" @clear="options = [], $emit('clear-tag')"
-    @change="$emit('change', $event)" clearable="clearable" filterable="filterable" remote="remote"
-    reserve-keyword="reserve-keyword" placeholder="Selectionner un utilisateur" :remote-method="remoteMethod"
-    :loading="loading">
+  <el-select ref="input-search" id="user" no-data-text="Aucun utilisateur trouvé" v-model="value"
+    @clear="options = [], $emit('clear-tag')" @change="$emit('change', $event)" clearable="clearable"
+    filterable="filterable" remote="remote" reserve-keyword="reserve-keyword" placeholder="Selectionner un utilisateur"
+    :remote-method="remoteMethod" :loading="loading">
     <el-option style="height: 100%" class="filter_user_option" v-for="user in options" :key="user.localId"
       :label="user.displayName" :value="user.localId">
       <el-avatar :src="user.photoUrl" class="me-3" />
@@ -13,7 +13,13 @@
 
 <script>
   import { mapGetters } from 'vuex'
-
+  import { db } from "~/plugins/firebase.js";
+  import {
+    collection,
+    getDocs,
+    query,
+    where
+  } from "firebase/firestore";
   export default {
     name: 'userFilter',
 
@@ -33,11 +39,22 @@
     },
 
     computed: {
-      ...mapGetters('app', { users: 'getUsers' })
+      ...mapGetters('app', { users: 'getUsers' }),
+
+      refInput() {
+        if (this.$refs['input-search']) {
+          return this.$refs['input-search']
+        } else {
+          return 'Loading...'
+        }
+
+      }
+
     },
 
-    created(){
+    created() {
       this.value = this.userName
+
     },
 
     mounted() {
@@ -45,12 +62,23 @@
     },
 
     methods: {
-      remoteMethod(query) {
-        if (query !== '') {
+
+      async remoteMethod(searchQuery) {
+
+        if (searchQuery !== '') {
           this.loading = true;
-          setTimeout(() => {
+          setTimeout(async () => {
             this.loading = false;
-            this.options = this.list.filter(item => {
+
+            let documentRef = query(collection(db, 'users'))
+            let documentSnapshots = await getDocs(documentRef)
+            this.options = documentSnapshots.docs.filter(
+              doc => doc.data().displayName.toLowerCase().split(' ').includes(searchQuery.toLowerCase().trim())
+            ).map(doc => {
+              return doc.data()
+            })
+
+            this.list.filter(item => {
               return item.displayName.toLowerCase()
                 .indexOf(query.toLowerCase()) > -1;
             });
