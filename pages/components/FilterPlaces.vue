@@ -8,9 +8,22 @@
           <label for="city">
             <i class="el-icon-location-outline"></i>
           </label>
-          <el-select id="city" class="w-100" filterable="filterable" name="Province" remote="remote" :value="byCity"
-            @input="filterByCity" clearable="clearable" placeholder="Selectioner une province">
-            <el-option v-for="city in cities" :key="city.id" :label="city.label" :value="city.id"></el-option>
+          <el-select
+            id="city"
+            class="w-100"
+            filterable="filterable"
+            name="Province"
+            :value="filteredCity"
+            @input="handleFilters('city', $event)"
+            clearable="clearable"
+            placeholder="Selectioner une province"
+          >
+            <el-option
+              v-for="city in cities"
+              :key="city.id"
+              :label="city.label"
+              :value="city.id"
+            ></el-option>
           </el-select>
         </div>
 
@@ -18,11 +31,22 @@
           <label for="category">
             <i class="el-icon-folder-opened"></i>
           </label>
-          <el-select id="category" class="w-100" name="Catégorie" remote="remote" :value="byCategory"
-            @input="filterByCategory" filterable="filterable" clearable="clearable"
-            placeholder="Selectioner une catégorie">
-            <el-option v-for="category in categories" :key="category.id" :label="category.name"
-              :value="category.id"></el-option>
+          <el-select
+            id="category"
+            class="w-100"
+            name="Catégorie"
+            :value="filteredCategory"
+            @input="handleFilters('category', $event)"
+            filterable="filterable"
+            clearable="clearable"
+            placeholder="Selectioner une catégorie"
+          >
+            <el-option
+              v-for="category in categories"
+              :key="category.id"
+              :label="category.name"
+              :value="category.id"
+            ></el-option>
           </el-select>
         </div>
 
@@ -30,17 +54,29 @@
           <label for="user">
             <i class="el-icon-user"></i>
           </label>
-          <user-filter class="w-100" @clear-tag="userName = null" :userName="userName" @change="filterByUser" />
+          <user-filter
+            class="w-100"
+            @change="handleFilters('user', $event)"
+          />
         </div>
       </div>
       <div class="row">
         <div class="col-12">
-          <el-input v-model="search" @input="$emit('change-search-value', $event)" placeholder="Rechercher un lieu"
-            trim="trim" clearable="clearable">
+          <el-input
+            :value="filteredSearch"
+            @input="handleFilters('search', $event)"
+            placeholder="Rechercher un lieu"
+            trim="trim"
+            clearable="clearable"
+          >
             <template #prepend>
-              <el-button @click="filterByDate">
+              <el-button @click="handleFilters('date', !filteredDate)">
                 Date
-                <i :class="`el-icon-caret-${byDate ? 'bottom' : 'top' }`"></i>
+                <i
+                  :class="`el-icon-caret-${
+                    filteredDate ? 'bottom' : 'top'
+                  }`"
+                ></i>
               </el-button>
             </template>
           </el-input>
@@ -50,108 +86,72 @@
   </div>
 </template>
 <script>
-  import UserFilter from '~/components/filter/UserFilter'
-  import { mapGetters } from 'vuex'
-  import { db } from "~/plugins/firebase.js";
-  import { doc, getDoc } from "firebase/firestore";
+import UserFilter from '~/components/filter/UserFilter'
+import { mapGetters } from 'vuex'
 
-  export default {
-    name: 'filter-places',
-    components: {
-      UserFilter,
+export default {
+  name: 'filter-places',
+  components: {
+    UserFilter,
+  },
+
+  props: {
+    filteredDate: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
+    filteredCity: {
 
-    props: {
-      byDate: {
-        type: Boolean,
-        required: false,
-        default: false,
-      },
-      byCity: {
-        required: false,
-        default: null,
-      },
-      byCategory: {
-        required: false,
-        default: null,
-      },
-      byUser: {
-        required: false,
-        default: null,
-      },
+      required: false,
+      default: null
     },
-
-    data() {
-      return {
-        openDialog: false,
-
-        search: '',
-        dateStatus: false,
-
-        userName: null,
-      }
+    filteredCategory: {
+      required: false,
+      default: null,
     },
+    filteredSearch:{
+      type: String,
+      required: false,
+      default: ''
+    }
+  },
 
-    computed: {
-      ...mapGetters('app', {
-        cities: 'getCities',
-        categories: 'getCategories',
-        users: 'getUsers',
-      }),
+  data() {
+    return {}
+  },
+
+  computed: {
+    ...mapGetters('app', {
+      cities: 'getCities',
+      categories: 'getCategories',
+    }),
+  },
+
+  methods: {
+    handleFilters(key, value) {
+      const filters = {}
+      filters[key] = value == '' && key !== 'search' ? null : value
+      this.$emit('update-filters', filters)
     },
-
-    methods: {
-      filterByDate() {
-        this.$emit('filter-by-date', !this.byDate)
-      },
-
-      filterByCity($event) {
-        let city = $event
-        if ($event === '') {
-          city = null
-        }
-        this.$emit('filter-by-city', city)
-      },
-
-      filterByCategory($event) {
-        let category = $event
-        if ($event === '') {
-          category = null
-        }
-        this.$emit('filter-by-category', category)
-      },
-
-      async filterByUser($event) {
-        if ($event) {
-          let documentRef = doc(db, 'users', $event)
-          let documentSnapshots = await getDoc(documentRef)
-          if (documentSnapshots) {
-            this.userName = documentSnapshots.data().displayName
-          }
-        } else {
-          this.userName = $event
-        }
-        this.$emit('filter-by-user', $event)
-
-      },
-    },
-  }
+  },
+}
 </script>
 
 <style lang="scss" scoped="scoped">
-  .filter-places {
-    &-more {
-      >div {
-        margin-top: 10px;
-        margin-bottom: 10px;
-        display: flex;
-        align-items: center;
+.filter-places {
+  &-more {
+    > div {
+      margin-top: 10px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
 
-        i {
-          font-size: 24px;
-          margin-right: 10px;
-        }
+      i {
+        font-size: 24px;
+        margin-right: 10px;
       }
     }
   }
+}
 </style>
