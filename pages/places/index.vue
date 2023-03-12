@@ -101,25 +101,24 @@ export default {
     }),
 
     filteredPlaces() {
-      let places = this.places
 
-      if (this.places && this.filters.search.length) {
-        places = places.filter((place) =>
+      if (this.filters.search.length) {
+        this.places = this.places.filter((place) =>
           place.title.toLowerCase().includes(this.filters.search.toLowerCase())
         )
       }
 
       if (this.filters.date) {
-        places = places.sort((a, b) =>
+        this.places.sort((a, b) =>
           this.filters.date && a.created_at < b.created_at ? 1 : -1
         )
       } else if (!this.filters.date) {
-        places = places.sort((a, b) =>
+        this.places.sort((a, b) =>
           this.filters.date && a.created_at > b.created_at ? 1 : -1
         )
       }
 
-      return places
+      return this.places
     },
 
     viewGoNextButton() {

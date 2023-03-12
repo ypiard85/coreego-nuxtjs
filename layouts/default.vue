@@ -13,8 +13,7 @@
 </template>
 
 <script>
-  import { auth } from '~/plugins/firebase'
-  import { mapActions, mapGetters } from 'vuex'
+  import { mapActions } from 'vuex'
   import NavigationBar from '~/pages/components/NavigationBar'
   import LoadingPage from '~/pages/components/LoadingPage'
 
@@ -24,7 +23,6 @@
     components: { NavigationBar, LoadingPage },
 
     data() {
-      const store = this.$store
       return {
         busy: false
       }
@@ -32,17 +30,23 @@
 
     async created() {
       await this.initApp()
+      if(this.currentUser){
+        this.setIsLogged(true)
+        this.setUserLogged(this.currentUser.toJSON())
+      }else{
+         this.setIsLogged(false)
+          this.setUserLogged(null)
+      }
     },
 
     computed: {
-
       currentUser() {
-        return auth && auth.currentUser
+        return this.$fire.auth ? this.$fire.auth.currentUser : null
       },
     },
 
     methods: {
-      // ...mapActions('auth', ['logout', 'setIsLogged']),
+      ...mapActions('auth', ['setIsLogged', 'setUserLogged']),
       ...mapActions('app', [
         'loadCities',
         'loadCategories'
@@ -55,9 +59,6 @@
             this.loadCities(),
             this.loadCategories()
           ])
-          // if (this.currentUser) {
-          //   await this.loadCarnet(this.currentUser.uid)
-          // }
         } catch (error) {
           console.log(error)
         } finally {

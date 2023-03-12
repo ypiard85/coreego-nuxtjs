@@ -7,18 +7,8 @@
 </template>
 
 <script>
-  import { db, auth } from "~/plugins/firebase";
-  import { doc, updateDoc, addDoc, collection } from "firebase/firestore";
-  import Axios from 'axios';
   export default {
     name: 'commentModal',
-
-    props: {
-      placeUser: {
-        type: Object,
-        required: true
-      }
-    },
 
     data() {
       return {
@@ -30,25 +20,18 @@
       async handleAddComment() {
         try {
           this.$emit('modal-busy', true)
+          const commentDocument = this.$fire.firestore.collection('commentaires')
 
-          let response = await Axios.post('/api/send-email', {
-            params:{
-              email: 'yoann.piard@gmail.com',
-              message: 'petit test'
-            }
-          })
-          console.log(response)
-
-          await addDoc(collection(db, "commentaires"), {
+          let commentObject = {
             placeId: this.$route.params.id,
-            user: auth.currentUser.uid,
+            user: this.$fire.auth.currentUser.uid,
             content: this.comment,
             created_at: new Date()
-          });
-
+          }
+          await commentDocument.add(commentObject)
           this.$message.success("Commentaire ajouté")
-          this.$emit('load-comments')
-          this.$emit('close-modal')
+          this.$emit('load')
+          this.$emit('close')
         } catch (error) {
           console.log(error)
         } finally {

@@ -4,25 +4,25 @@
   v-loading="busy" :title="modal.title" :visible="modal.open" :fullscreen="fullscreen" :append-to-body="true" @close="$emit('close-modal')">
     <template v-if="modal.name">
       <template v-if="modal.name == 'gestionImages' ">
-        <GestionImagesModal
+        <!-- <GestionImagesModal
         :place="place"
         @modal-busy="busy = $event"
         @close-modal="$emit('close-modal')"
         @load-place="$emit('load-place', $event) "
-        />
+        /> -->
       </template>
 
-    <template v-if="modal.name == 'kakaomap' && modal.open ">
-      <KakaoModal :place="place"  @close-modal="$emit('close-modal')" />
+    <template v-if="modal.name === 'kakaomap' && modal.open ">
+      <!-- <KakaoModal :place="place"  @close-modal="$emit('close-modal')" /> -->
     </template>
 
-    <template v-if="modal.name == 'comment' && modal.open ">
-        <CommentModal
+    <template v-if="modal.name === 'comment' && modal.open ">
+        <!-- <CommentModal
         :placeUser="place.user"
         @modal-busy="busy = $event"
         @close-modal="$emit('close-modal')"
         @load-comments="$emit('load-comments')"
-        />
+        /> -->
     </template>
 
     </template>
@@ -30,12 +30,11 @@
 </template>
 
 <script>
-  import GestionImagesModal from './modal/GestionImagesModal'
-  import KakaoModal from './modal/KakaoModal'
-  import CommentModal from './modal/CommentModal'
+  // import KakaoModal from './modal/KakaoModal'
+  // import CommentModal from './modal/CommentModal'
   export default {
     name: 'modals',
-    components: { GestionImagesModal, KakaoModal,CommentModal },
+    // components: { CommentModal },
     props: {
       place:{
         type: Object,

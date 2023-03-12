@@ -4,7 +4,7 @@
     id="user"
     no-data-text="Aucun utilisateur trouvé"
     v-model="value"
-    @clear="(options = [])"
+    @clear="options = []"
     @change="$emit('change', $event)"
     clearable="clearable"
     filterable="filterable"
@@ -18,11 +18,11 @@
       style="height: 100%"
       class="filter_user_option"
       v-for="user in options"
-      :key="user.localId"
+      :key="user.uid"
       :label="user.displayName"
-      :value="user.localId"
+      :value="user.uid"
     >
-      <el-avatar :src="user.photoUrl" class="me-3" />
+      <el-avatar :src="user.photoURL" class="me-3" />
       <span>{{ user.displayName }}</span>
     </el-option>
   </el-select>
@@ -35,8 +35,7 @@ import { collection, getDocs, query, where } from 'firebase/firestore'
 export default {
   name: 'userFilter',
 
-  props: {
-  },
+  props: {},
 
   data() {
     return {

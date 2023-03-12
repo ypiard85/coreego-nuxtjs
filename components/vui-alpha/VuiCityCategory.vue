@@ -1,9 +1,10 @@
 <template>
   <div class="d-flex align-items-center vui-city-category">
-    <span class="me-2 text-secondary fw-bold"
-      ><i class="el-icon-location-outline"></i>{{ city.label }}</span
-    >
-    <vui-tag :label="category.name" :color="category.color" />
+    <span class="me-2 text-secondary city d-flex align-items-center">
+      <i class="el-icon-location-outline me-1"></i>
+      {{ city.label }}
+    </span>
+    <vui-tag class="category" :label="category.name" :color="category.color" />
   </div>
 </template>
 
@@ -28,11 +29,12 @@ export default {
   computed: {
     ...mapGetters('app', { categories: 'getCategories', cities: 'getCities' }),
 
-     category() {
-       return this.place && this.categories.find(
-         (category) => category.id === this.place.category
-       )
-     },
+    category() {
+      return (
+        this.place &&
+        this.categories.find((category) => category.id === this.place.category)
+      )
+    },
 
     city() {
       return this.cities.find((city) => city.id === this.place.city)
@@ -41,4 +43,17 @@ export default {
 }
 </script>
 
-<style></style>
+<style scoped lang="scss">
+  .vui-city-category{
+    .city{
+        i{
+          font-weight: bold;
+          font-size: 24px;
+        }
+      }
+      .category{
+
+      }
+
+  }
+</style>

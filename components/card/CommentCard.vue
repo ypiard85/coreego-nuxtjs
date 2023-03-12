@@ -6,12 +6,11 @@
         <el-button class="text-danger" @click="$emit('delete-comment', comment.id)" type="text" icon="el-icon-delete-solid"></el-button>
       </div>
       <div class="d-flex align-items-center">
-        <el-avatar class="me-3" :src="user.photoUrl" />
-        <p class="fw-bold text-blue"> {{user.displayName}} </p>
+        <vui-user :userUid="comment.user" />
       </div>
       <small class="time text-secondary"> {{publishedDate}} </small>
     </div>
-    <div class="bottom text item" v-if="!editMode">
+    <div class="bottom text item" v-if="!editMode" style="white-space: normal" >
       {{comment.content}}
     </div>
     <template v-if="editMode">
@@ -28,15 +27,16 @@
 
 <script>
   import moment from 'moment';
+  import VuiUser from '../vui-alpha/VuiUser.vue';
   export default {
     name: 'CommentCard',
 
+  components: {
+    VuiUser
+  },
+
     props: {
       comment: {
-        type: Object,
-        required: true
-      },
-      user: {
         type: Object,
         required: true
       },
@@ -49,17 +49,14 @@
     data() {
       return {
         editMode: false,
-        content: null
+        content: this.comment.content
       }
     },
 
-    created() {
-      this.content = this.comment.content
-    },
 
     computed: {
       publishedDate() {
-        return moment.unix(this.comment.created_at.seconds).locale('fr').format('dddd D MMMM YYYY - HH:mm ')
+        return moment(this.comment.created_at.seconds).locale('fr').format('dddd D MMMM YYYY - HH:mm ')
       },
     },
 
@@ -68,7 +65,7 @@
         this.$emit('edit-comment', {
           id: this.comment.id,
           content: this.content
-        } )
+        })
         this.editMode = false
       }
     }

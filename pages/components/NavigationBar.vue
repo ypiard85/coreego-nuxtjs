@@ -122,10 +122,6 @@ export default {
     return { LOGO_PATH }
   },
 
-  created() {
-    console.log('create')
-  },
-
   methods: {
     // ...mapActions("auth", ["logout"]),
 

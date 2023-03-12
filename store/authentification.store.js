@@ -1,16 +1,7 @@
-import { db, auth } from "~/plugins/firebase.js";
-import { signOut } from "firebase/auth";
-import {
-  signInWithPopup,
-  GoogleAuthProvider,
-  FacebookAuthProvider,
-} from "firebase/auth";
-
-
 export default {
   namespaced: true,
   state: {
-    user: null,
+    userLogged: null,
     errorMessage: "",
     isLogged : false,
   },
@@ -23,6 +14,10 @@ export default {
     getIsLogged(state) {
       return state.isLogged;
     },
+
+    getUserLogged(state){
+        return state.user
+    }
 
   },
 
@@ -38,8 +33,11 @@ export default {
     },
 
     UPDATE_IS_LOGED(state, status){
-
       state.isLogged  = status
+    },
+
+    UPDATE_USER_LOGGED(state, user){
+      state.userLogged = user
     }
 
   },
@@ -58,6 +56,10 @@ export default {
         context.commit('ON_AUTH_STATE_CHANGED_MUTATION', authUser)
         // Do something with the authUser and the claims object...
       }
+    },
+
+    setUserLogged(context, user){
+        context.commit('UPDATE_USER_LOGGED', user)
     },
 
     setIsLogged(context, status){

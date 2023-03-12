@@ -2,7 +2,7 @@
   <div class="place-view">
     <!-- <Middleware :viewPlace="true" /> -->
     <div class="position-relative" v-if="!busy">
-      <DiaporamaThumb :images="place.images" class="diapo" />
+      <diaporama-thumb :images="place.images" class="diapo" />
       <section class="position-relative bg-light py-3">
         <b-container fluid="md">
           <!-- Introduction du lieu -->
@@ -25,40 +25,56 @@
             />
             <setting-dropdown
               v-if="isAuthPlace"
-              @command-button="$emit('command-button', $event)"
+              @command-button="handleCommand"
             />
           </div>
-          <!-- <Introduction
-            :place="place"
-            :user="user"
-            :isAuthPlace="isAuthPlace"
-            @open-kakao-map="openKakaoMap = true"
-            @command-button="handleCommand"
-          /> -->
         </b-container>
       </section>
 
-      <!-- <section role="commentaires">
+      <section role="commentaires">
         <b-container>
-          <Comment
+          <comment
             @open-modal="modal = $event"
             :comments="comments"
-            @load-comments="loadCommentaires"
+            @click="openCommentModal"
+            @load="loadComments"
           />
         </b-container>
-      </section> -->
+      </section>
 
-      <!-- <Modals
-        :modal="modal"
-        @close-modal="closeModal"
-        :place="place"
-        @load-place="reloadPlace"
-        @load-comments="loadCommentaires"
-      /> -->
+      <template v-if="modal.open">
+        <el-dialog
+          :append-to-body="true"
+          :title="modal.title"
+          :visible="modal.open"
+          :fullscreen="modal.fullscreen"
+          :custom-class="modal.customClass"
+          @close="resetModalDatas"
+        >
+          <template v-if="modal.name === 'images'">
+            <GestionImagesModal
+              :place="place"
+              @modal-busy="modalBusy = $event"
+              @close="resetModalDatas"
+              @load="loadPlace"
+            />
+          </template>
+          <template v-if="modal.name === 'kakaomap'">
+            <KakaoMapModal :place="place" @close="resetModalDatas" />
+          </template>
+          <template v-if="modal.name === 'comments'">
+            <comment-modal
+              @modal-busy="modalBusy = $event"
+              @load="loadComments"
+              @close="resetModalDatas"
+            />
+          </template>
+        </el-dialog>
+      </template>
 
       <el-button
         class="place-view__see-map"
-        @click=";(modal.open = true), (modal.name = 'kakaomap')"
+        @click="openKakaoMap"
         circle
         type="success"
         icon="el-icon-map-location"
@@ -70,47 +86,33 @@
 </template>
 
 <script>
-import {
-  getDoc,
-  getDocs,
-  setDoc,
-  addDoc,
-  deleteDoc,
-  doc,
-  collection,
-  query,
-  where,
-  orderBy,
-} from 'firebase/firestore'
-import { auth, db } from '~/plugins/firebase'
-import Introduction from '../../components/place/Introduction'
 import DiaporamaThumb from '../../components/place/DiaporamaThumb'
 import SettingDropdown from '@/pages/components/place/_SettingDropdown'
-import VuiModal from '~/components/vui-alpha/modal/VuiModal'
 import Comment from '../../components/place/Comment'
 
 import MapUiOptions from '~/components/map/map-ui/MapUiOptions'
 import { mapGetters, mapActions } from 'vuex'
 import Middleware from '~/pages/components/Middleware'
-import Modals from '~/pages/components/place/Modals'
 import VuiCityCategory from '@/components/vui-alpha/VuiCityCategory'
-import VuiUser from '../../../components/vui-alpha/VuiUser.vue'
-import VuiBooleanButton from '../../../components/vui-alpha/VuiBooleanButton'
-
+import VuiUser from '@/components/vui-alpha/VuiUser.vue'
+import VuiBooleanButton from '@/components/vui-alpha/VuiBooleanButton'
+import GestionImagesModal from '@/components/modal/GestionImagesModal'
+import KakaoMapModal from '@/components/modal/KakaoMapModal.vue'
+import CommentModal from '@/components/modal/CommentModal'
 export default {
   name: 'place',
   components: {
-    Introduction,
     DiaporamaThumb,
     VuiCityCategory,
     VuiBooleanButton,
     MapUiOptions,
-    VuiModal,
     Middleware,
-    Modals,
+    KakaoMapModal,
+    CommentModal,
     Comment,
     VuiUser,
     SettingDropdown,
+    GestionImagesModal,
   },
 
   data() {
@@ -123,14 +125,14 @@ export default {
         open: false,
         name: null,
         title: null,
+        fullscreen: false,
+        customClass: null,
       },
+      modalBusy: false,
+      loadingBtn: false,
 
       commentaire: '',
-
-      modalBusy: false,
       busy: false,
-
-      loadingBtn: false,
     }
   },
 
@@ -141,7 +143,7 @@ export default {
     }),
 
     currentUser() {
-      return auth ? auth.currentUser.uid : null
+      return this.$fire.auth ? this.$fire.auth.currentUser.uid : null
     },
 
     isAuthPlace() {
@@ -167,13 +169,34 @@ export default {
   },
 
   methods: {
-    ...mapActions('app', ['loadPlaces', 'loadCarnet']),
 
-    closeModal() {
+    resetModalDatas() {
       this.modal = {
         open: false,
         name: null,
         title: null,
+        fullscreen: false,
+        customClass: null,
+      }
+    },
+
+    openKakaoMap() {
+      this.modal = {
+        open: true,
+        name: 'kakaomap',
+        title: null,
+        fullscreen: true,
+        customClass: null,
+      }
+    },
+
+    openCommentModal() {
+      this.modal = {
+        open: true,
+        name: 'comments',
+        title: 'Ajouter un commentaire',
+        fullscreen: false,
+        customClass: 'comment-modal',
       }
     },
 
@@ -181,48 +204,23 @@ export default {
       if (command === 'goToPlaceEditView') {
         this.$router.replace('/places/edit/' + this.$route.params.id)
       } else if (command === 'openModalPictureSetting') {
-        this.modal.open = true
-        this.modal.name = 'gestionImages'
+        this.modal = {
+          open: true,
+          name: 'images',
+          title: null,
+          fullscreen: true,
+          customClass: null,
+        }
       }
-    },
-
-    async reloadPlace() {
-      await this.loadPlaces()
-      await this.hydrateDataPlace()
     },
 
     async loadView() {
       try {
         this.busy = true
 
-        const placeDocumentRef = doc(db, 'lieux', this.$route.params.id)
-        const commentDocumentRef = query(
-          collection(db, 'commentaires'),
-          where('placeId', '==', this.$route.params.id),
-          orderBy('created_at', 'desc')
-        )
-
-        const carnetDocumentRef = doc(db, 'carnets', this.currentUser)
-
-        let [place, comments, carnet] = await Promise.all([
-          getDoc(placeDocumentRef),
-          getDocs(commentDocumentRef),
-          getDoc(carnetDocumentRef),
-        ])
-
-        if (place.exists()) {
-          this.place = place.data()
-        }
-
-        if (carnet.exists()) {
-          this.carnet = carnet.data().places
-        }
-
-        if (comments) {
-          comments.forEach((comment) => {
-            this.comments.push({ ...comment.data(), id: comment.id })
-          })
-        }
+        await this.loadPlace()
+        await this.loadComments()
+        await this.loadCarnet()
       } catch (error) {
         console.log(error)
       } finally {
@@ -230,9 +228,62 @@ export default {
       }
     },
 
+    async loadPlace() {
+      try {
+        const placeDocumentRef = await this.$fire.firestore
+          .collection('lieux')
+          .doc(this.$route.params.id)
+          .get()
+
+        if (placeDocumentRef.exists) {
+          this.place = placeDocumentRef.data()
+        }
+      } catch (error) {}
+    },
+
+    async loadCarnet() {
+      try {
+        const carnetDocumentRef = await this.$fire.firestore
+          .collection('carnets')
+          .doc(this.currentUser)
+          .get()
+
+        if (carnetDocumentRef.exists) {
+          this.carnet = await carnetDocumentRef.data().places
+        }
+
+      } catch (error) {
+        console.log(error)
+      }
+    },
+
+    async loadComments() {
+      try {
+        const commentDocumentRef = await this.$fire.firestore
+          .collection('commentaires')
+          .where('placeId', '==', this.$route.params.id)
+          .orderBy('created_at', 'desc')
+          .get()
+
+        let comments = []
+        commentDocumentRef.docs.forEach((comment) => {
+          if (comment.exists) {
+            comments.push({ ...comment.data(), id: comment.id })
+          }
+        })
+        this.comments = comments
+      } catch (error) {
+        console.log(error)
+      }
+    },
+
     async updateCarnet() {
       try {
         this.loadingBtn = true
+
+        let carnetDocument = this.$fire.firestore
+          .collection('carnets')
+          .doc(this.currentUser)
 
         if (this.placePresentInCarnet) {
           this.carnet = this.carnet.filter(
@@ -243,16 +294,17 @@ export default {
         }
 
         if (this.carnet.length > 0) {
-          await setDoc(doc(db, 'carnets', this.currentUser), {
+          await carnetDocument.set({
             places: [...this.carnet],
           })
+
           this.$message.success(
             this.placePresentInCarnet
               ? 'Lieu ajouté dans votre carnet de route'
               : 'Lieu supprimé de votre carnet de route'
           )
         } else {
-          await deleteDoc(doc(db, 'carnets', this.currentUser))
+          await carnetDocument.delete()
           this.$message.success('Lieu supprimé de votre carnet de route')
         }
       } catch (error) {
@@ -273,5 +325,10 @@ export default {
     right: 10px;
     bottom: 10px;
   }
+}
+
+::v-deep .comment-modal {
+  width: 500px;
+  max-width: 100%;
 }
 </style>
