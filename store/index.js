@@ -1,10 +1,17 @@
 import Vuex from 'vuex'
 import auth from "./authentification.store";
-import app from './app.store'
+import {state, mutations, getters, actions} from './app.store'
 import middleware from './middleware.store'
 
 export default () => new Vuex.Store({
-  modules: {
-    auth, app, middleware
+  modules:{
+      app:{
+        namespaced: true,
+        state: state,
+        mutations: mutations,
+        getters: getters,
+        actions: actions
+      },
+      auth
   }
 })

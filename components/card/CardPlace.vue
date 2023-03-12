@@ -1,10 +1,7 @@
 <template>
-  <nuxt-link v-if="place && user" :to="'/places/view/' + place.id">
+  <nuxt-link v-if="place" :to="'/places/view/' + place.id">
     <el-card :body-style="{ padding: '0px' }" class="shadow">
-      <div class="d-flex align-items-center py-2 ps-2 bg-light">
-        <el-avatar class="me-2" :src="user.photoUrl"></el-avatar>
-        <span class="fw-bold text-blue">{{ user.displayName }}</span>
-      </div>
+      <vui-user :userUid="place.user" class="p-2 px-3" />
       <el-image
         :src="place.thumbnail.url"
         fit="cover"
@@ -13,15 +10,9 @@
       <div style="padding: 14px" class="bg-light">
         <strong class="d-block text-truncate">{{ place.title }} </strong>
         <div class="bottom clearfix mt-3">
-          <div class="d-flex">
-            <p class="me-2 text-secondary">
-              <i class="el-icon-location-outline"></i>
-              {{ city.label }}
-            </p>
-            <vui-tag :color="category.color" :label="category.name" />
-          </div>
+          <vui-city-category :place="place" />
           <div class="mt-2">
-            <small>{{ timeAgo }} </small>
+            <small>{{ timeAgo(place.created_at) }} </small>
           </div>
         </div>
       </div>
@@ -35,31 +26,14 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
-import {
-  getDownloadURL,
-  ref as storageRef,
-  deleteObject,
-} from 'firebase/storage'
-import { storage } from '~/plugins/firebase'
-import { auth, db } from '~/plugins/firebase'
-import {
-  doc,
-  setDoc,
-  addDoc,
-  collection,
-  deleteDoc,
-  getDoc,
-  GeoPoint,
-  updateDoc,
-} from 'firebase/firestore'
-import moment from 'moment'
-import VuiTag from '@/components/vui-alpha/VuiTag'
+import VuiCityCategory from '@/components/vui-alpha/VuiCityCategory'
+import VuiUser from '../vui-alpha/VuiUser'
+import {timeAgo} from '@/utils/general.js'
 
 export default {
   name: 'CardPlace',
 
-  components: { VuiTag },
+  components: { VuiCityCategory, VuiUser },
 
   props: {
     place: {
@@ -68,48 +42,12 @@ export default {
     },
   },
 
-  data() {
-    return {
-      user: null,
+  data(){
+    return{
+      timeAgo
     }
-  },
+  }
 
-  async created() {
-    await this.getUser()
-  },
-
-  methods: {
-    async getUser() {
-      let userReference = doc(db, 'users', this.place.user)
-      let userDocument = await getDoc(userReference)
-      this.user = userDocument.data()
-    },
-  },
-
-  computed: {
-    ...mapGetters('app', {
-      places: 'getPlaces',
-      categories: 'getCategories',
-      cities: 'getCities',
-      users: 'getUsers',
-    }),
-
-    category() {
-      return this.categories.find(
-        (category) => category.id === this.place.category
-      )
-    },
-
-    city() {
-      return this.cities.find((city) => city.id === this.place.city)
-    },
-
-    timeAgo() {
-      return moment(new Date(this.place.created_at.seconds * 1000))
-        .locale('fr')
-        .fromNow()
-    },
-  },
 }
 </script>
 

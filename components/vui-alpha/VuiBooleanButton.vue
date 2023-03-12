@@ -1,12 +1,12 @@
 <template>
-    <el-button :type="type" @click="$emit('status-changed')" :loading="busy"
+    <el-button :type="type" @click="$emit('change')" :loading="loadingBtn"
     :icon="icon">{{label}}</el-button>
 </template>
 
 <script>
 
   export default{
-    name: 'SwitchButton',
+    name: 'VuiButtonReverse',
 
     props:{
       status:{
@@ -30,7 +30,7 @@
         type: String,
         required: true,
       },
-      busy:{
+      loadingBtn:{
         type: Boolean,
         required: true
       }

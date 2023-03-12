@@ -14,13 +14,6 @@
     </section>
 
     <section class="mt-5" v-if="isLogged">
-      <!-- <el-button v-if="!inCarnet" type="primary" @click="$emit('add-to-carnet')" :loading="loadingBtn"
-        icon="el-icon-plus">Carnet de route</el-button>
-      <el-button v-else type="danger" :loading="loadingBtn" @click="$emit('delete-to-carnet')"
-        icon="el-icon-minus">Carnet de route</el-button> -->
-      <switch-button :status="inCarnet" true-icon="el-icon-plus" false-icon="el-icon-minus" true-label="Carnet de route"
-        false-label="Carnet de route" :busy="busy" @status-changed="updateCarnet" />
-
       <setting-dropdown v-if="isAuthPlace" @command-button="$emit('command-button', $event)" />
 
     </section>
@@ -32,14 +25,13 @@
   import VuiTag from '@/components/vui-alpha/VuiTag'
   import Avatar from '@/components/Avatar'
   import SettingDropdown from './_SettingDropdown'
-  import SwitchButton from '@/components/button/SwitchButton'
   import { mapGetters, mapActions } from 'vuex'
   import { auth, db, storage } from "~/plugins/firebase";
   import { getDoc, getDocs, setDoc, updateDoc, doc, deleteDoc, addDoc } from "firebase/firestore";
 
 
   export default {
-    components: { VuiTag, Avatar, SettingDropdown, SwitchButton },
+    components: { VuiTag, Avatar, SettingDropdown,  },
 
     props: {
       place: {

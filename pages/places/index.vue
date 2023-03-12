@@ -109,9 +109,15 @@ export default {
         )
       }
 
-      places = places.sort((a, b) =>
-        this.filters.date && a.created_at < b.created_at ? 1 : -1
-      )
+      if (this.filters.date) {
+        places = places.sort((a, b) =>
+          this.filters.date && a.created_at < b.created_at ? 1 : -1
+        )
+      } else if (!this.filters.date) {
+        places = places.sort((a, b) =>
+          this.filters.date && a.created_at > b.created_at ? 1 : -1
+        )
+      }
 
       return places
     },

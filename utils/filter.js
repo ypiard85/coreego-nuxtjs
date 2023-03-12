@@ -1,3 +1,4 @@
+//TODO : le mettre dans general
 export const capitalize = (value) => {
     if (!value) return ''
     value = value.toString()

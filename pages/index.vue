@@ -26,7 +26,6 @@
       // maxPlace(){
       //   return this.places.length > 6 ? 6 : this.places.length
       // }
-
     }
 
   }

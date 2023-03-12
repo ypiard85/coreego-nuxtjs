@@ -4,12 +4,13 @@ import fs from 'fs'
 export default {
   // Disable server-side rendering: https://go.nuxtjs.dev/ssr-mode
 
-
   //Envoyer des notifications
   // https://yuhanna.medium.com/how-to-add-push-notification-to-your-nuxt-js-web-app-using-firebase-abf12f19a67b
   ssr: false,
 
   meta: { layout: 'layoutApp' },
+
+  store: '~/store/authentification.store.js',
 
   server: {
     https: {
@@ -21,8 +22,8 @@ export default {
     timing: false,
   },
 
-  serverMiddleware:{
-    '/api' : '~/api'
+  serverMiddleware: {
+    '/api': '~/api',
   },
 
   // Global page headers: https://go.nuxtjs.dev/config-head
@@ -69,7 +70,7 @@ export default {
     initialize: {
       onAuthStateChangedMutation: 'ON_AUTH_STATE_CHANGED_MUTATION',
       onAuthStateChangedAction: 'onAuthStateChangedAction',
-      subscribeManually: false,
+      subscribeManually: true,
     },
     ssr: false, // default
     emulatorPort: process.env.NODE_ENV === 'development' ? 8000 : undefined,
@@ -85,6 +86,9 @@ export default {
     settings: {
       // Firestore Settings - currently only works in SPA mode
     },
+    enablePersistence: {
+      synchronizeTabs: true
+    }
   },
 
   storage: true,
@@ -103,6 +107,25 @@ export default {
     // https://go.nuxtjs.dev/content
     '@nuxt/content',
     'bootstrap-vue/nuxt',
+    [
+      '@nuxtjs/firebase',
+      {
+        config: {
+          apiKey: 'AIzaSyBpuxuwhUGwVjuQZwZwkekjE2hDqRNqhas',
+          authDomain: 'coreego-35f6d.firebaseapp.com',
+          projectId: 'coreego-35f6d',
+          storageBucket: 'coreego-35f6d.appspot.com',
+          messagingSenderId: '103070451813',
+          appId: '1:103070451813:web:70e2cde72ca106cd0ede8c',
+          measurementId: 'G-TVMSF7H7NP',
+        },
+        services: {
+          auth: true,
+          firestore: true,
+          storage: true,
+        },
+      },
+    ],
   ],
 
   bootstrapVue: {
@@ -119,7 +142,6 @@ export default {
 
   // Content module configuration: https://go.nuxtjs.dev/config-content
   content: {},
-
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {

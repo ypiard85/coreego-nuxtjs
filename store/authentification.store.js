@@ -6,9 +6,11 @@ import {
   FacebookAuthProvider,
 } from "firebase/auth";
 
+
 export default {
   namespaced: true,
   state: {
+    user: null,
     errorMessage: "",
     isLogged : false,
   },
@@ -25,80 +27,46 @@ export default {
   },
 
   mutations: {
+    ON_AUTH_STATE_CHANGED_MUTATION: (state, {authUser, claims}) => {
+      console.log(authUser)
+      const {uid, email, emailVerified} = authUser
+      state.user = {uid, email, emailVerified}
+    },
 
     SET_ERREUR_MESSAGE(state, value) {
       state.errorMessage = value;
     },
 
     UPDATE_IS_LOGED(state, status){
+
       state.isLogged  = status
     }
 
   },
 
   actions: {
+    onAuthStateChangedAction: (context, {authUser, claims}) => {
+      if (!authUser) {
+        console.log('appel ici fonction', authUser)
+        // claims = null
+        // Perform logout operations
+        context.commit('UPDATE_IS_LOGED', false)
+        context.commit('ON_AUTH_STATE_CHANGED_MUTATION', null)
+      } else {
+        console.log('appel ici cef fonction', authUser)
+        context.commit('UPDATE_IS_LOGED', true)
+        context.commit('ON_AUTH_STATE_CHANGED_MUTATION', authUser)
+        // Do something with the authUser and the claims object...
+      }
+    },
 
     setIsLogged(context, status){
       context.commit('UPDATE_IS_LOGED', status)
     },
 
-    async logout({ commit }) {
-      try {
-        await signOut(auth);
-        commit('UPDATE_IS_LOGED', false)
-        window.location.href = "/login";
-      } catch (error) {}
-    },
-
-    async connectWithGoogle(context) {
-      try {
-        await signInWithPopup(auth, new GoogleAuthProvider());
-        window.location.href = "/";
-      } catch (error) {
-        console.log("erreur auth 403");
-        const errorCode = error.code;
-        error.message;
-        // The email of the user's account used.
-        error.customData.email;
-        // The AuthCredential type that was used.
-        GoogleAuthProvider.credentialFromError(error);
-        if (errorCode === "auth/account-exists-with-different-credential") {
-          context.dispatch("fetchErreurMessage", "Cet email est déja utiliser");
-        }
-      }
-    },
-
-    async connectWithFacebook(context) {
-      await signInWithPopup(auth, new FacebookAuthProvider())
-        .then((result) => {
-          // The signed-in user info.
-          console.log(result)
-          result.user;
-          // This gives you a Facebook Access Token. You can use it to access the Facebook API.
-          const credential = FacebookAuthProvider.credentialFromResult(result);
-          credential.accessToken;
-          window.location.href = "/";
-        })
-        .catch((error) => {
-          // Handle Errors here.
-          console.log(error)
-          const errorCode = error.code;
-          error.message;
-          // The email of the user's account used.
-          error.customData.email;
-          // The AuthCredential type that was used.
-          FacebookAuthProvider.credentialFromError(error);
-          if (errorCode === "auth/account-exists-with-different-credential") {
-            context.dispatch(
-              "fetchErreurMessage",
-              "Cet email est déja utiliser"
-            );
-          }
-        });
-    },
-
     fetchErreurMessage(context, value) {
       context.commit("SET_ERREUR_MESSAGE", value);
     },
+
   },
 };

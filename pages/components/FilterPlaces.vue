@@ -26,7 +26,6 @@
             ></el-option>
           </el-select>
         </div>
-
         <div class="col-md-4 col-xs-12 col-sm-6">
           <label for="category">
             <i class="el-icon-folder-opened"></i>
@@ -61,6 +60,7 @@
         </div>
       </div>
       <div class="row">
+       <span class="fw-bold mb-2">Sous filtres</span>
         <div class="col-12">
           <el-input
             :value="filteredSearch"
