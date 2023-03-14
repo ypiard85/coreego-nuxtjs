@@ -40,7 +40,12 @@
         <el-row type="flex" class="justify-content-between flex-wrap">
           <el-col :xs="24" :sm="10" :md="10">
             <el-form-item label="Ville">
-              <el-select placeholder="Ville" remote v-model="form.city" style="width: 100%">
+              <el-select
+                placeholder="Ville"
+                remote
+                v-model="form.city"
+                style="width: 100%"
+              >
                 <el-option
                   v-for="citiesOption in citiesOptions"
                   :key="citiesOption.id"
@@ -53,7 +58,12 @@
 
           <el-col :xs="24" :sm="10" :md="10">
             <el-form-item label="Categorie">
-              <el-select placeholder="Categorie" remote v-model="form.category" style="width: 100%">
+              <el-select
+                placeholder="Categorie"
+                remote
+                v-model="form.category"
+                style="width: 100%"
+              >
                 <el-option
                   v-for="categoriesOption in categoriesOptions"
                   :key="categoriesOption.id"
@@ -94,11 +104,8 @@
         </el-form-item>
 
         <el-form-item>
-          <el-button
-            type="primary"
-            @click="submitForm('ruleForm')"
-          >
-            {{ !isEditMode ? "Créer" : "Modifier" }}
+          <el-button type="primary" @click="submitForm('ruleForm')">
+            {{ !isEditMode ? 'Créer' : 'Modifier' }}
           </el-button>
         </el-form-item>
       </el-form>
@@ -112,12 +119,12 @@
           v-if="map.openMap"
           id="mapmarker"
           @change-type="
-            map.type = $event;
-            reloadMap();
+            map.type = $event
+            reloadMap()
           "
           @change-mode="
-            map.mode = $event;
-            reloadMap();
+            map.mode = $event
+            reloadMap()
           "
           @close-map="map.openMap = false"
           :lat="form.latitude"
@@ -132,22 +139,22 @@
   </div>
 </template>
 <script>
-import VuiInput from "~/components/vui-alpha/input/VuiInput";
-import VuiOptionsInput from "~/components/vui-alpha/input/VuiOptionsInput";
-import VuiFilesInput from "~/components/vui-alpha/input/VuiFilesInput";
-import VuiTextAreaInput from "~/components/vui-alpha/input/VuiTextAreaInput";
-import KakaoMap from "~/components/map/KakaoMap";
-import Axios from "axios";
-import { mapGetters, mapActions } from "vuex";
-import { auth, db, storage } from "~/plugins/firebase";
-import {getImageUrl} from './../../utils/request.js'
+import VuiInput from '~/components/vui-alpha/input/VuiInput'
+import VuiOptionsInput from '~/components/vui-alpha/input/VuiOptionsInput'
+import VuiFilesInput from '~/components/vui-alpha/input/VuiFilesInput'
+import VuiTextAreaInput from '~/components/vui-alpha/input/VuiTextAreaInput'
+import KakaoMap from '~/components/map/KakaoMap'
+import Axios from 'axios'
+import { mapGetters, mapActions } from 'vuex'
+import { auth, db, storage } from '~/plugins/firebase'
+import { getImageUrl } from './../../utils/request.js'
 import HeaderPage from './HeaderPage'
 import {
   getDownloadURL,
   ref as storageRef,
   deleteObject,
   uploadBytesResumable,
-} from "firebase/storage";
+} from 'firebase/storage'
 import {
   doc,
   setDoc,
@@ -155,12 +162,12 @@ import {
   collection,
   GeoPoint,
   updateDoc,
-} from "firebase/firestore";
-import InputGeopoint from "@/components/vui-alpha/input/InputGeopoint";
+} from 'firebase/firestore'
+import InputGeopoint from '@/components/vui-alpha/input/InputGeopoint'
 import * as imageConversion from 'image-conversion'
 
 export default {
-  name: "place-form",
+  name: 'place-form',
   components: {
     VuiInput,
     VuiOptionsInput,
@@ -168,7 +175,7 @@ export default {
     VuiTextAreaInput,
     KakaoMap,
     InputGeopoint,
-    HeaderPage
+    HeaderPage,
   },
 
   props: {
@@ -177,7 +184,7 @@ export default {
       required: true,
     },
     place: {
-      required: false,
+      required: false
     },
     placeLoaded: {
       type: Boolean,
@@ -209,22 +216,22 @@ export default {
       rules: {
         title: {
           required: true,
-          message: "Le champ ne dois pas être vide",
-          trigger: "blur",
+          message: 'Le champ ne dois pas être vide',
+          trigger: 'blur',
         },
 
         latitude: [
-          { required: true, message: "Le champ ne dois pas être vide" },
+          { required: true, message: 'Le champ ne dois pas être vide' },
         ],
 
         longitude: [
-          { required: true, message: "Le champ ne dois pas être vide" },
+          { required: true, message: 'Le champ ne dois pas être vide' },
         ],
 
         description: {
           required: true,
-          message: "Le champ ne dois pas être vide",
-          trigger: "blur",
+          message: 'Le champ ne dois pas être vide',
+          trigger: 'blur',
         },
       },
 
@@ -234,77 +241,78 @@ export default {
         mode: 2,
         reload: false,
       },
-    };
+    }
   },
 
   computed: {
-    ...mapGetters("app", {
-      cities: "getCities",
-      categories: "getCategories",
-      places: "getPlaces",
+    ...mapGetters('app', {
+      cities: 'getCities',
+      categories: 'getCategories',
+      places: 'getPlaces',
     }),
     imageValidation() {
       return (
         this.previews.length > 0 ||
         (this.form.images && this.form.images.length > 0)
-      );
+      )
     },
 
-    user(){
-      return (auth && auth.currentUser) && auth.currentUser
+    user() {
+      return this.$fire.auth.currentUser ? this.$fire.auth.currentUser : null
     },
 
     citiesOptions() {
-      return [...this.cities];
+      return [...this.cities]
     },
     categoriesOptions() {
-      return [...this.categories];
+      return [...this.categories]
     },
   },
 
   async created() {
-    await this.hydrateForm();
+    await this.hydrateForm()
 
-    if (this.isEditMode && this.$refs["inputGeopoint"]) {
-      this.$refs.inputGeopoint.loadValidGeopoint();
+    if (this.isEditMode && this.$refs['inputGeopoint']) {
+      this.$refs.inputGeopoint.loadValidGeopoint()
     }
   },
 
   methods: {
-    ...mapActions("app", ["loadPlaces"]),
-
     onPreviewFiles($event) {
       for (let file of $event.target.files) {
-        imageConversion.compressAccurately(file, 200).then(res => {
-         this.previews.push({ file: res, url: URL.createObjectURL(res) });
-        }).catch(error => console.log(error))
+        imageConversion
+          .compressAccurately(file, 200)
+          .then((res) => {
+            this.previews.push({ file: res, url: URL.createObjectURL(res) })
+          })
+          .catch((error) => console.log(error))
       }
     },
 
     deleteFilePreview(image) {
-      this.previews = this.previews.filter((preview, i) => i !== image);
+      this.previews = this.previews.filter((preview, i) => i !== image)
     },
 
     deleteCurrentFile($event) {
       try {
         this.$bvModal
-          .msgBoxConfirm("Voulez vous supprimer cette image ? ")
+          .msgBoxConfirm('Voulez vous supprimer cette image ? ')
           .then((val) => {
             if (val) {
-              this.trashImage.push($event);
+              this.trashImage.push($event)
               this.form.images = this.form.images.filter(
                 (image) => image.name !== $event.name
-              );
+              )
             }
-          });
+          })
       } catch (error) {
-        console.log(error);
+        console.log(error)
       }
     },
 
     restoreImages() {
-      this.form.images = this.form.images.concat(this.trashImage);
-      this.trashImage = [];
+      this.form.images = this.form.images.concat(this.trashImage)
+      this.trashImage = []
     },
 
     async hydrateForm() {
@@ -317,108 +325,107 @@ export default {
         images: [],
         thumbnail: null,
         description: null,
-      };
+      }
 
       if (this.isEditMode && this.place) {
-        formData.title = this.place.title;
-        formData.latitude = this.place.geopoint._lat.toString();
-        formData.longitude = this.place.geopoint._long.toString();
-        formData.city = this.place.city;
-        formData.category = this.place.category;
-        formData.description = this.place.description;
+        formData.title = this.place.title
+        formData.latitude = this.place.geopoint._lat.toString()
+        formData.longitude = this.place.geopoint._long.toString()
+        formData.city = this.place.city
+        formData.category = this.place.category
+        formData.description = this.place.description
         formData.thumbnail = this.place.thumbnail
         formData.images = this.place.images
       } else {
-        formData.title = "";
-        formData.latitude = "";
-        formData.longitude = "";
-        formData.city = this.cities[0].id;
-        formData.category = this.categories[0].id;
+        formData.title = ''
+        formData.latitude = ''
+        formData.longitude = ''
+        formData.city = this.cities[0].id
+        formData.category = this.categories[0].id
       }
 
       //On applique les datas formatés à l'objet form
       for (const formKey of Object.keys(formData)) {
-        this.form[formKey] = formData[formKey];
+        this.form[formKey] = formData[formKey]
       }
     },
 
     async submitForm(formName) {
-      this.busy = true;
+      this.busy = true
+
+      const lieuDocument = this.$fire.firestore.collection('lieux')
+
       this.$refs[formName].validate(async (valid) => {
         if (!valid || !this.imageValidation || this.errorLocalisation) {
-          this.$message.error("Veuillez vérifier votre formulaire");
-          this.busy = false;
+          this.$message.error('Veuillez vérifier votre formulaire')
+          this.busy = false
         } else {
           try {
-            let images = [];
+            let images = []
             if (this.previews.length > 0) {
               for (let preview of this.previews) {
                 let fileName =
                   this.user.uid +
-                  Math.floor(Math.random() * (80000 - 1000) + 1000);
-                  //upload images
-                  const FILES_REF = storageRef(storage, "lieux/" + fileName);
-                  await uploadBytesResumable(FILES_REF, preview.file);
+                  Math.floor(Math.random() * (80000 - 1000) + 1000)
+                //upload images
+                const FILE_PATH = this.$fire.storage.ref('lieux/' + fileName)
+                await FILE_PATH.put(preview.file)
+                const IMGAGE_URL = await FILE_PATH.getDownloadURL()
 
-                  const IMG_URL = await getImageUrl(fileName)
-
-                  images.push({
-                    name: fileName,
-                    url: IMG_URL
-                  });
+                images.push({
+                  name: fileName,
+                  url: IMGAGE_URL,
+                })
               }
             }
 
             if (!this.isEditMode) {
+              let formData = this.formData()
+              formData.images = images
+              formData.thumbnail = images[0]
 
-              let formData = this.formData();
-              formData.images = images;
-              formData.thumbnail = images[0];
+              await lieuDocument.add(formData)
 
-              await addDoc(collection(db, "lieux"), formData);
-              await this.loadPlaces();
-              this.$message.success("Lieu ajouté")
-              this.$router.push("/");
-
+              this.$message.success('Lieu ajouté')
+              this.$router.push('/')
             } else {
               if (this.trashImage && this.trashImage.length > 0) {
                 for (let trashImage of this.trashImage) {
-                  const imageRef = storageRef(
-                    storage,
-                    "lieux/" + trashImage.name
-                  );
-                  await deleteObject(imageRef);
-
+                  const IMG_PATH = this.$fire.storage.ref(
+                    'lieux/' + trashImage.name
+                  )
+                  await IMG_PATH.delete()
                 }
               }
 
-              let formData = this.formData();
+              let formData = this.formData()
 
-              formData.images = this.form.images.concat(images);
-              formData.images;
+              formData.images = this.form.images.concat(images)
+              formData.images
               let findThumbnail = formData.images.find(
                 (image) => image.name === this.place.thumbnail.name
-              );
+              )
 
               if (!findThumbnail) {
-                formData.thumbnail = formData.images[0];
-              }else{
+                formData.thumbnail = formData.images[0]
+              } else {
                 formData.thumbnail = this.place.thumbnail
               }
 
-              await setDoc(doc(db, "lieux", this.$route.params.id), formData);
-              this.$message.success("Lieu modifié");
-              await this.loadPlaces();
+              const documentSnapShot = lieuDocument.doc(this.$route.params.id)
+              await documentSnapShot.set(formData)
+              this.$message.success('Lieu modifié')
+
               this.$router.replace('/places/view/' + this.place.id)
             }
           } catch (error) {
-              this.$message.error(error);
-              console.log(error)
+            this.$message.error(error)
+            console.log(error)
           } finally {
-            this.busy = false;
+            this.busy = false
           }
         }
-      });
+      })
     },
 
     formData() {
@@ -433,18 +440,17 @@ export default {
         user: this.user.uid,
         created_at: new Date(),
         updated_at: new Date(),
-      };
+      }
     },
 
     reloadMap() {
-      this.map.openMap = false;
+      this.map.openMap = false
       this.$nextTick(() => {
-        this.map.openMap = true;
-      });
+        this.map.openMap = true
+      })
     },
   },
-};
+}
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

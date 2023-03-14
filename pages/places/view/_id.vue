@@ -230,13 +230,13 @@ export default {
 
     async loadPlace() {
       try {
-        const placeDocumentRef = await this.$fire.firestore
+        const documentRef = await this.$fire.firestore
           .collection('lieux')
           .doc(this.$route.params.id)
           .get()
 
-        if (placeDocumentRef.exists) {
-          this.place = placeDocumentRef.data()
+        if (documentRef.exists) {
+          this.place = documentRef.data()
         }
       } catch (error) {}
     },

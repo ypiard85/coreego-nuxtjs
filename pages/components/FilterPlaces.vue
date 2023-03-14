@@ -132,6 +132,7 @@ export default {
     handleFilters(key, value) {
       const filters = {}
       filters[key] = value == '' && key !== 'search' ? null : value
+      console.log(filters)
       this.$emit('update-filters', filters)
     },
   },

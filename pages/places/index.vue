@@ -12,7 +12,7 @@
     />
     <!-- Conent -->
     <b-container fluid="sm" v-if="!busy">
-      <template v-if="filteredPlaces.length > 0">
+      <template v-if="places.length > 0">
         <el-row :gutter="10">
           <el-col
             :xs="24"
@@ -20,7 +20,7 @@
             :md="12"
             :lg="8"
             class="mb-2"
-            v-for="(place, i) in filteredPlaces"
+            v-for="(place, i) in places"
             :key="i"
           >
             <card-place :place="place" />
@@ -100,44 +100,8 @@ export default {
       categories: 'getCategories',
     }),
 
-    filteredPlaces() {
-
-      if (this.filters.search.length) {
-        this.places = this.places.filter((place) =>
-          place.title.toLowerCase().includes(this.filters.search.toLowerCase())
-        )
-      }
-
-      if (this.filters.date) {
-        this.places.sort((a, b) =>
-          this.filters.date && a.created_at < b.created_at ? 1 : -1
-        )
-      } else if (!this.filters.date) {
-        this.places.sort((a, b) =>
-          this.filters.date && a.created_at > b.created_at ? 1 : -1
-        )
-      }
-
-      return this.places
-    },
-
     viewGoNextButton() {
-      return (
-        this.filteredPlaces.length > 0 &&
-        this.filteredPlaces.length !== this.maxPlaces
-      )
-    },
-
-    queryFiltered() {
-      let queryFiltered = []
-      if (this.filters.city)
-        queryFiltered.push(where('city', '==', this.filters.city))
-      if (this.filters.category)
-        queryFiltered.push(where('category', '==', this.filters.category))
-      if (this.filters.user)
-        queryFiltered.push(where('user', '==', this.filters.user))
-
-      return queryFiltered
+      return this.places.length > 0 && this.places.length !== this.maxPlaces
     },
   },
 
@@ -149,10 +113,43 @@ export default {
       await this.loadView()
     },
 
-    async initMaxPlaces() {
-      let documentRef = query(collection(db, 'lieux'), ...this.queryFiltered)
+    queryFiltered(document) {
+      if (this.filters.city)
+        document = document.where('city', '==', this.filters.city)
+      if (this.filters.category)
+        document = document.where('category', '==', this.filters.category)
+      if (this.filters.user)
+        document = document.where('user', '==', this.filters.user)
 
-      let documentSnapshots = await getDocs(documentRef)
+      return document
+    },
+
+    async getDocumentSnapShots(goNext = false) {
+      let documentRef = this.$fire.firestore
+        .collection('lieux')
+        .limit(20)
+        .orderBy('created_at', this.filters.date !== null ? 'asc' : 'desc')
+
+      if (goNext) {
+        const lastDocument = this.places[this.places.length - 1]
+        documentRef = documentRef.startAfter(lastDocument.updated_at)
+      }
+
+      documentRef = this.queryFiltered(documentRef)
+
+      let documentSnapshots = await documentRef.get()
+
+      return documentSnapshots
+    },
+
+    async initMaxPlaces() {
+      let documentRef = this.$fire.firestore
+        .collection('lieux')
+        .orderBy('created_at', this.filters.date ? 'asc' : 'desc')
+
+      documentRef = this.queryFiltered(documentRef)
+
+      let documentSnapshots = await documentRef.get()
       this.maxPlaces = documentSnapshots.docs.length
     },
 
@@ -162,20 +159,13 @@ export default {
           this.busy = true
         }
 
-        let documentRef = query(
-          collection(db, 'lieux'),
-          orderBy('created_at', 'desc'),
-          ...this.queryFiltered,
-          limit(20)
-        )
+        let documentSnapShots = await this.getDocumentSnapShots()
 
-        let documentSnapshots = await getDocs(documentRef)
-
-        if (!documentSnapshots) {
+        if (!documentSnapShots) {
           throw new Error('impossible de charger les lieux')
         }
 
-        this.places = documentSnapshots.docs.map((doc) => {
+        this.places = documentSnapShots.docs.map((doc) => {
           return { ...doc.data(), id: doc.id }
         })
 
@@ -192,22 +182,13 @@ export default {
     async handleGoNext() {
       try {
         // Spécifiez le document à partir duquel commencer la pagination
-        const lastDocument = this.places[this.places.length - 1]
+
+        let documentSnapShots = await this.getDocumentSnapShots(true)
 
         // Créez la requête avec les filtres et les limites appropriés
-        const placeRef = query(
-          collection(db, 'lieux'),
-          orderBy('created_at', 'desc'),
-          ...this.queryFiltered,
-          startAfter(lastDocument.updated_at),
-          limit(20)
-        )
-
-        // Récupérez les documents avec la requête créée
-        const documentSnapshots = await getDocs(placeRef)
 
         // Transformez les documents récupérés en un tableau d'objets de lieu
-        const nextPlaces = documentSnapshots.docs.map((doc) => {
+        const nextPlaces = documentSnapShots.docs.map((doc) => {
           return { ...doc.data(), id: doc.id }
         })
 
