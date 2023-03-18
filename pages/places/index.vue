@@ -128,7 +128,7 @@ export default {
       let documentRef = this.$fire.firestore
         .collection('lieux')
         .limit(20)
-        .orderBy('created_at', this.filters.date !== null ? 'asc' : 'desc')
+        .orderBy('created_at', this.filters.date ? 'asc' : 'desc')
 
       if (goNext) {
         const lastDocument = this.places[this.places.length - 1]

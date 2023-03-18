@@ -416,7 +416,7 @@ export default {
               await documentSnapShot.set(formData)
               this.$message.success('Lieu modifié')
 
-              this.$router.replace('/places/view/' + this.place.id)
+              this.$router.replace('/places/view/' + this.$route.params.id)
             }
           } catch (error) {
             this.$message.error(error)

@@ -1,6 +1,6 @@
 <template>
    <el-button  circle :icon="icon" :type="type" size="small">
-      <input type="file" @change="$emit('change-file', $event)" accept=".png, .jpg, .jpeg" class="position-absolute top-0 end-0 start-0 bottom-0" />
+      <input ref="vui-uploader" type="file" @change="$emit('change-file', $event)" accept=".png, .jpg, .jpeg" class="position-absolute top-0 end-0 start-0 bottom-0" />
    </el-button >
 </template>
 <script>
@@ -14,8 +14,18 @@ export default {
       type:{
       type: String,
       required: false,
+      default: ''
    }
    },
+
+   computed:{
+      refUplaoder(){
+         if(this.$refs['vui-uploader']){
+            return this.$refs['vui-uploader']
+         }
+      }
+   }
+
 }
 </script>
 <style lang="scss" scoped >

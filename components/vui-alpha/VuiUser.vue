@@ -1,5 +1,5 @@
 <template>
-  <nuxt-link v-if="user" class="d-inline-flex align-items-center" :to="`/profil/view/${user.localId}`"
+  <nuxt-link v-if="user" class="d-inline-flex align-items-center" :to="`/profil/view/${user.uid}`"
     :class="{'pe-none' : !link }"
   >
     <el-avatar
