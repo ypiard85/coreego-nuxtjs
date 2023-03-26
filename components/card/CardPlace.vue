@@ -1,34 +1,27 @@
 <template>
-  <nuxt-link v-if="place" :to="'/places/view/' + place.id">
-    <el-card :body-style="{ padding: '0px' }" class="shadow">
-      <vui-user :userUid="place.user" class="p-2 px-3" />
-      <el-image
-        :src="place.thumbnail.url"
-        fit="cover"
-        style="height: 200px; width: 100%"
-      />
-      <div style="padding: 14px" class="bg-light">
-        <strong class="d-block text-truncate">{{ place.title }} </strong>
-        <div class="bottom clearfix mt-3">
-          <vui-city-category :place="place" />
-          <div class="mt-2">
-            <small>{{ timeAgo(place.created_at) }} </small>
-          </div>
+  <el-card :body-style="{ padding: '0px' }" class="shadow">
+    <vui-user :userUid="place.user" class="p-2 px-3" />
+    <el-image
+      :src="place.thumbnail.url"
+      fit="cover"
+      style="height: 200px; width: 100%"
+    />
+    <div style="padding: 14px" class="bg-light">
+      <strong class="d-block text-truncate">{{ place.title }} </strong>
+      <div class="bottom clearfix mt-3">
+        <vui-city-category :place="place" />
+        <div class="mt-2">
+          <small>{{ timeAgo(place.created_at) }} </small>
         </div>
       </div>
-    </el-card>
-  </nuxt-link>
-  <b-skeleton
-    animation="wave"
-    style="height: 500px; pointer-events: none"
-    v-else
-  ></b-skeleton>
+    </div>
+  </el-card>
 </template>
 
 <script>
 import VuiCityCategory from '@/components/vui-alpha/VuiCityCategory'
 import VuiUser from '../vui-alpha/VuiUser'
-import {timeAgo} from '@/utils/general.js'
+import { timeAgo } from '@/utils/general.js'
 
 export default {
   name: 'CardPlace',
@@ -42,12 +35,11 @@ export default {
     },
   },
 
-  data(){
-    return{
-      timeAgo
+  data() {
+    return {
+      timeAgo,
     }
-  }
-
+  },
 }
 </script>
 

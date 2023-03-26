@@ -3,6 +3,14 @@ import { db, auth } from '~/plugins/firebase.js'
 export const state = () => ({
   cities: null,
   categories: null,
+  filters: {
+    search: '',
+    category: null,
+    city: null,
+    user: null,
+    date: false,
+  },
+
 })
 
 export const getters = {
@@ -13,6 +21,9 @@ export const getters = {
   getCategories: (state) => {
     return state.categories
   },
+  getFilters: (state) => {
+      return state.filters
+  }
 }
 
 export const mutations = {
@@ -23,9 +34,19 @@ export const mutations = {
   updateCategories(state, categories) {
     state.categories = categories
   },
+
+  updateFilter(state, filters){
+    state.filters = filters
+  }
+
 }
 
 export const actions = {
+
+  setFilters(context, filters){
+    context.commit('updateFilter', filters)
+  },
+
   async loadCities(context) {
     const cityDocument = this.$fire.firestore.collection('cities').get()
 

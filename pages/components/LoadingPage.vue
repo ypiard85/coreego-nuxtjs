@@ -1,5 +1,5 @@
 <template>
-    <div class="d-flex flex-column justify-content-center align-items-center loading__page" style="height: 80vh">
+    <div class="d-flex flex-column justify-content-center align-items-center loading__page" style="height: 100vh">
         <div class="d-flex">
             <div class="point one"></div>
             <div class="point two"></div>
@@ -9,7 +9,7 @@
     </div>
 </template>
 
-<style scoped="scoped" lang="scss">
+<style scoped lang="scss">
    .loading__page {
         .point {
             background-color: $blue-principal;

@@ -13,7 +13,7 @@
             class="w-100"
             filterable="filterable"
             name="Province"
-            :value="filteredCity"
+            :value="filters.city"
             @input="handleFilters('city', $event)"
             clearable="clearable"
             placeholder="Selectioner une province"
@@ -34,7 +34,7 @@
             id="category"
             class="w-100"
             name="Catégorie"
-            :value="filteredCategory"
+            :value="filters.category"
             @input="handleFilters('category', $event)"
             filterable="filterable"
             clearable="clearable"
@@ -63,18 +63,18 @@
        <span class="fw-bold mb-2">Sous filtres</span>
         <div class="col-12">
           <el-input
-            :value="filteredSearch"
+            :value="filters.search"
             @input="handleFilters('search', $event)"
             placeholder="Rechercher un lieu"
             trim="trim"
             clearable="clearable"
           >
             <template #prepend>
-              <el-button @click="handleFilters('date', !filteredDate)">
+              <el-button @click="handleFilters('date', !filters.date)">
                 Date
                 <i
                   :class="`el-icon-caret-${
-                    filteredDate ? 'bottom' : 'top'
+                    filters.date ? 'bottom' : 'top'
                   }`"
                 ></i>
               </el-button>
@@ -96,6 +96,11 @@ export default {
   },
 
   props: {
+    filters:{
+      type: Object,
+      required: true
+    },
+
     filteredDate: {
       type: Boolean,
       required: false,
@@ -132,7 +137,6 @@ export default {
     handleFilters(key, value) {
       const filters = {}
       filters[key] = value == '' && key !== 'search' ? null : value
-      console.log(filters)
       this.$emit('update-filters', filters)
     },
   },

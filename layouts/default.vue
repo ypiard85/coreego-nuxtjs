@@ -1,10 +1,8 @@
 <template>
   <div>
-    <template v-if="!busy">
-      <navigation-bar :user="currentUser" />
-      <Nuxt class="mb-4" />
-    </template>
-    <loading-page v-else />
+    <loading-page v-if="isLoading" />
+    <navigation-bar :user="user" />
+    <Nuxt class="mb-4" />
   </div>
 </template>
 
@@ -19,27 +17,33 @@ export default {
 
   data() {
     return {
-      busy: false
+      isLoading: false,
+      user: null,
     }
   },
 
   async created() {
+        this.$router.app.$on('viewLoading', (value) => {
+      this.isLoading = value
+    })
     await this.initApp()
-    if (this.currentUser) {
-      this.setIsLogged(true)
-      this.setUserLogged(this.currentUser.toJSON())
-    } else {
-      this.setIsLogged(false)
-      this.setUserLogged(null)
-    }
+
+    await this.$fire.auth.onAuthStateChanged(() => {
+      this.user = this.$fire.auth.currentUser
+      if (this.user) {
+        console.log('user logged')
+        this.setIsLogged(true)
+        this.setUserLogged(this.user)
+      } else {
+        console.log('user unlogged')
+        this.setIsLogged(false)
+        this.setUserLogged(null)
+      }
+    })
   },
 
   computed: {
-    ...mapGetters('auth', {userLogged: 'getUserLogged'} ),
-
-    currentUser() {
-      return this.$fire.auth.currentUser ? this.$fire.auth.currentUser : null
-    },
+    ...mapGetters('auth', { userLogged: 'getUserLogged' }),
   },
 
   methods: {
@@ -48,15 +52,16 @@ export default {
 
     async initApp() {
       try {
-        this.busy = true
+        this.isLoading = true
         await Promise.all([this.loadCities(), this.loadCategories()])
       } catch (error) {
         console.log(error)
       } finally {
-        this.busy = false
+        this.isLoading = false
       }
     },
   },
+  //mixin dans main.js
 }
 </script>
 

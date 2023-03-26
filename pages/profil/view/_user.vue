@@ -38,177 +38,131 @@
     </header>
     <b-container>
       <div class="row">
-      <div class="profil__about mt-3 col-md-12">
-        <el-card class="box-card">
-          <div slot="header" class="clearfix">
-            <span>Description</span>
-            <el-button
-              v-if="editGranted"
-              @click="openAbout = !openAbout"
-              style="float: right; padding: 3px 0"
-              class="text-dark"
-              type="text"
-              icon="el-icon-edit"
-            ></el-button>
-          </div>
-          <template v-if="!openAbout">
-            <div class="text description">
-              <p
-                style="white-space: pre-line"
-                v-if="profil && profil.about && profil.about.length"
-                v-html="profil.about"
-              ></p>
-              <em v-else>Aucune description</em>
+        <div class="profil__about mt-3 col-md-12">
+          <el-card class="box-card">
+            <div slot="header" class="clearfix">
+              <span>Description</span>
+              <el-button
+                v-if="editGranted"
+                @click="openAbout = !openAbout"
+                style="float: right; padding: 3px 0"
+                class="text-dark"
+                type="text"
+                icon="el-icon-edit"
+              ></el-button>
             </div>
-          </template>
-          <template v-else>
-            <el-form class="demo-ruleForm">
-              <label for="description"
-                ><strong>Parler un peu de vous</strong>
-                <small>[{{ about.length }} - 500 caractères]</small></label
-              >
-              <div class="mb-3">
-                <small class="text-secondary">code html autorisé</small>
+            <template v-if="!openAbout">
+              <div class="text description">
+                <p
+                  style="white-space: pre-line"
+                  v-if="profil && profil.about && profil.about.length"
+                  v-html="profil.about"
+                ></p>
+                <em v-else>Aucune description</em>
               </div>
-              <el-form-item>
-                <el-input
-                  type="textarea"
-                  @input="inputAbout"
-                  id="description"
-                  :value="about"
-                  rows="10"
-                ></el-input>
-              </el-form-item>
-              <el-form-item>
-                <el-button type="success" size="small" @click="onSubmitAbout"
-                  >Modifier</el-button
+            </template>
+            <template v-else>
+              <el-form class="demo-ruleForm">
+                <label for="description"
+                  ><strong>Parler un peu de vous</strong>
+                  <small>[{{ about.length }} - 500 caractères]</small></label
                 >
-                <el-button type="danger" size="small" @click="openAbout = false"
-                  >Annuler</el-button
-                >
-              </el-form-item>
-            </el-form>
-          </template>
-        </el-card>
+                <div class="mb-3">
+                  <small class="text-secondary">code html autorisé</small>
+                </div>
+                <el-form-item>
+                  <el-input
+                    type="textarea"
+                    @input="inputAbout"
+                    id="description"
+                    :value="about"
+                    rows="10"
+                  ></el-input>
+                </el-form-item>
+                <el-form-item>
+                  <el-button type="success" size="small" @click="onSubmitAbout"
+                    >Modifier</el-button
+                  >
+                  <el-button
+                    type="danger"
+                    size="small"
+                    @click="openAbout = false"
+                    >Annuler</el-button
+                  >
+                </el-form-item>
+              </el-form>
+            </template>
+          </el-card>
+        </div>
       </div>
-      </div>
+      <!-- section activités -->
       <div class="row">
-        <div class="col-md-4 mt-5">
+        <template v-if="editGranted">
+          <div class="col-md-6 mt-5">
+            <el-card class="box-card">
+              <div
+                slot="header"
+                class="d-flex justify-content-between align-items-center"
+              >
+                <span>Mon carnet de route</span>
+                <el-button type="success" size="small">Voir la map</el-button>
+              </div>
+              <div>
+                <template v-if="carnets.length">
+                  <nuxt-link
+                    :to="'/places/view/' + place.id"
+                    v-for="(place, index) in carnets"
+                    :key="index"
+                    class="mb-3 d-block"
+                  >
+                    <card-place-linear :place="place" />
+                  </nuxt-link>
+                </template>
+                <em v-else>Votre carnet de route est vide</em>
+              </div>
+            </el-card>
+          </div>
+        </template>
+        <div class="col-md-6 mt-5">
           <el-card class="box-card">
-            <div slot="header">
-                Mon carnet de route
+            <div
+              slot="header"
+              class="d-flex justify-content-between align-items-center"
+            >
+              <span>Dernier lieux publiés</span>
+              <el-button type="success" size="small" @click.stop="watchUserPlaces">Voir plus</el-button>
             </div>
-
-          </el-card>
-        </div>
-        <div class="col-md-4 mt-5">
-          <el-card class="box-card">
-              <div slot="header">
-                Dernière activités
+            <div>
+              <template v-if="placesPublished.length">
+                <nuxt-link
+                  :to="'/places/view/' + place.id"
+                  v-for="(place, index) in placesPublished"
+                  :key="index"
+                  class="mb-3 d-block"
+                >
+                  <card-place-linear :place="place" />
+                </nuxt-link>
+              </template>
+              <em v-else>Aucun lieux publiés</em>
             </div>
-          </el-card>
-        </div>
-        <div class="col-md-4 mt-5">
-          <el-card class="box-card">
-             <div slot="header">
-                Dernier lieux publiés
-            </div>
-
           </el-card>
         </div>
       </div>
     </b-container>
-    <!-- <div class="profil__header" v-if="user && avatarUrl">
-      <b-container>
-
-        <section class="profil--places-published mt-3">
-          <el-card class="box-card">
-            <div slot="header" class="clearfix">
-              <span class="fw-bold">Lieux publiés</span>
-              <el-button
-                style="float: right; padding: 3px 0"
-                type="text"
-                v-if="placeAll(null).length"
-                @click="visibleDialogPlace = true"
-                >Voir tous</el-button
-              >
-            </div>
-            <template v-if="placeAll(null).length">
-              <nuxt-link
-                :to="'/places/view/' + place.id"
-                :underline="false"
-                v-for="(place, i) in placeAll(5)"
-                :key="i"
-                class="profil--places-published__content p-2"
-              >
-                <div class="d-flex align-items-center mw-100">
-                  <el-image
-                    :src="place.thumbnail.url"
-                    class="rounded me-3"
-                    fit="cover"
-                  ></el-image>
-                  <div
-                    class="profil--places-published__content--title"
-                    style="min-width: 0"
-                  >
-                    <span class="fs-6 mb-1 fw-bold d-block text-truncate">{{
-                      place.title
-                    }}</span>
-                    <div class="d-flex align-items-center">
-                      <span class="me-3">
-                        <i class="el-icon-location-outline" />
-                        {{ city(place.city).label }}
-                      </span>
-                      <vui-tag
-                        :label="category(place.category).name"
-                        :color="category(place.category).color"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </nuxt-link>
-            </template>
-            <em v-else>Aucun lieu publié</em>
-          </el-card>
-        </section>
-      </b-container>
-
-      <el-dialog
-        :title="'Lieux de : ' + user.displayName"
-        :fullscreen="true"
-        :visible="visibleDialogPlace"
-        @close="visibleDialogPlace = false"
-      >
-        <template v-if="places.at(0)">
-          <el-row :gutter="10">
-            <el-col
-              :xs="24"
-              :sm="12"
-              :md="12"
-              :lg="8"
-              class="mb-2"
-              v-for="(place, i) in placeAll(null)"
-              :key="i"
-            >
-              <card-place :place="place" />
-            </el-col>
-          </el-row>
-        </template>
-      </el-dialog>
-    </div> -->
   </div>
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 import { IMAGE_EMPTY } from '~/utils/variables'
 import VuiSingleUpload from '@/components/vui-alpha/input/VuiSingleUpload'
 import * as imageConversion from 'image-conversion'
 import VuiTag from '~/components/vui-alpha/VuiTag'
-import { auth, db, storage, updateProfileUser } from '~/plugins/firebase'
+import { auth, db, updateProfileUser } from '~/plugins/firebase'
 import ViewPlaces from '~/pages/places/index'
 import { doc, setDoc } from 'firebase/firestore'
 import Middleware from '~/pages/components/Middleware'
+import CardPlaceLinear from '@/components/card/CardPlaceLinear.vue'
 
 export default {
   name: 'profil',
@@ -218,15 +172,17 @@ export default {
     VuiTag,
     ViewPlaces,
     Middleware,
+    CardPlaceLinear,
   },
 
   data() {
     return {
       isBusy: false,
-
       //hydrater lors de l'initialisation de la view
       user: null,
       profil: null,
+      carnets: [],
+      placesPublished: [],
 
       thumbnailFile: null,
       avatarFile: null,
@@ -252,6 +208,7 @@ export default {
     ...mapGetters('app', {
       categories: 'getCategories',
       cities: 'getCities',
+      filters: 'getFilters'
     }),
 
     category() {
@@ -276,9 +233,18 @@ export default {
   },
 
   methods: {
+    ...mapActions('app', ['setFilters'] ),
+
+    watchUserPlaces(){
+        let filters = Object.assign(this.filters)
+        filters['user'] = this.$route.params.user
+        this.setFilters(filters)
+        this.$router.replace('/places')
+    },
+
     async initView() {
+      this.$router.app.$emit('viewLoading', true)
       try {
-        this.isBusy = true
         const userDocumentRef = await this.$fire.firestore
           .collection('users')
           .doc(this.$route.params.user)
@@ -289,6 +255,17 @@ export default {
           .doc(this.$route.params.user)
           .get()
 
+        const carnetDocumentRef = await this.$fire.firestore
+          .collection('carnets')
+          .doc(this.$route.params.user)
+          .get()
+
+        const placesDocumentRef = await this.$fire.firestore
+          .collection('lieux')
+          .where('user', '==', this.$route.params.user)
+          .orderBy('updated_at', 'desc')
+          .limit(2)
+
         if (profilDocumentRef.exists) {
           this.profil = profilDocumentRef.data()
 
@@ -297,18 +274,58 @@ export default {
           }
         }
 
+        if (carnetDocumentRef.exists) {
+          const placeIds = carnetDocumentRef.data().places
+          let carnets = []
+
+          if (placeIds && placeIds.length > 0) {
+            for (let placeId of placeIds) {
+              const place = await this.getPlaceById(placeId)
+              carnets.push(place)
+            }
+          }
+          this.carnets = carnets
+        }
+
+        if (placesDocumentRef) {
+          const documentPlacesSnapShots = await placesDocumentRef.get()
+
+          if (documentPlacesSnapShots) {
+            this.placesPublished = documentPlacesSnapShots.docs.map((doc) => {
+              return { ...doc.data(), id: doc.id }
+            })
+          }
+          // this.placesPublished.push()
+        }
+
         this.user = userDocumentRef.data()
       } catch (error) {
         console.log(error)
-      } finally {
-        this.isBusy = false
       }
+      this.$router.app.$emit('viewLoading', false)
     },
 
     inputAbout($event) {
       if ($event.length <= 500) {
         this.about = $event
       }
+    },
+
+    getPlaceById(placeId) {
+      return new Promise((resolve, reject) => {
+        this.$fire.firestore
+          .collection('lieux')
+          .doc(placeId)
+          .get()
+          .then((response) => {
+            if (response.exists) {
+              resolve({ ...response.data(), id: response.id })
+            }
+          })
+          .catch((error) => {
+            reject("Le document n'a pas pu être chargé")
+          })
+      })
     },
 
     async handleUpdateFile($event, name) {

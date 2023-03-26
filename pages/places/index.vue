@@ -1,17 +1,9 @@
 <template>
   <div>
     <!-- Filtre -->
-    <filter-places
-      v-if="filter"
-      @update-filters="updateFilters"
-      :filteredCity="filters.city"
-      :filteredCategory="filters.category"
-      :filteredUser="filters.user"
-      :filteredDate="filters.date"
-      :filteredSearch="filters.search"
-    />
+    <filter-places @update-filters="updateFilters" :filters="filters" />
     <!-- Conent -->
-    <b-container fluid="sm" v-if="!busy">
+    <b-container fluid="sm">
       <template v-if="places.length > 0">
         <el-row :gutter="10">
           <el-col
@@ -23,7 +15,14 @@
             v-for="(place, i) in places"
             :key="i"
           >
-            <card-place :place="place" />
+            <nuxt-link v-if="!busy" :to="'/places/view/' + place.id">
+              <card-place :place="place" />
+            </nuxt-link>
+            <b-skeleton
+              animation="wave"
+              style="min-height: 300px; pointer-events: none"
+              v-else
+            ></b-skeleton>
           </el-col>
         </el-row>
       </template>
@@ -35,35 +34,18 @@
         >Voir plus</el-button
       >
     </b-container>
-    <slot name="loading" v-else />
   </div>
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 import VuiSearchInput from '~/components/vui-alpha/input/VuiSearchInput'
 import CardPlace from '~/components/card/CardPlace'
 import FilterPlaces from '../components/FilterPlaces'
-import { db } from '~/plugins/firebase.js'
-import {
-  collection,
-  getDocs,
-  startAfter,
-  query,
-  where,
-  limit,
-  orderBy,
-} from 'firebase/firestore'
 export default {
   name: 'places',
 
-  props: {
-    filter: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
-  },
+  props: {},
 
   components: {
     VuiSearchInput,
@@ -74,14 +56,6 @@ export default {
     return {
       byDate: false,
 
-      filters: {
-        search: '',
-        category: null,
-        city: null,
-        user: null,
-        date: false,
-      },
-
       busy: false,
 
       places: [],
@@ -90,7 +64,7 @@ export default {
   },
 
   async created() {
-    await this.loadView()
+    await this.loadView(true)
     await this.initMaxPlaces()
   },
 
@@ -98,6 +72,7 @@ export default {
     ...mapGetters('app', {
       cities: 'getCities',
       categories: 'getCategories',
+      filters: 'getFilters',
     }),
 
     viewGoNextButton() {
@@ -106,11 +81,21 @@ export default {
   },
 
   methods: {
-    async updateFilters(filters) {
-      for (const filterKey of Object.keys(filters)) {
-        this.filters[filterKey] = filters[filterKey]
+    ...mapActions('app', ['setFilters']),
+
+    async updateFilters($event) {
+      this.busy = true
+
+      let filters = this.filters
+
+      for (const filterKey of Object.keys($event)) {
+        filters[filterKey] = $event[filterKey]
       }
-      await this.loadView()
+
+      this.setFilters(filters)
+
+      await this.loadView(false)
+      this.busy = false
     },
 
     queryFiltered(document) {
@@ -145,7 +130,7 @@ export default {
     async initMaxPlaces() {
       let documentRef = this.$fire.firestore
         .collection('lieux')
-        .orderBy('created_at', this.filters.date ? 'asc' : 'desc')
+        .orderBy('updated_at', this.filters.date ? 'asc' : 'desc')
 
       documentRef = this.queryFiltered(documentRef)
 
@@ -154,11 +139,10 @@ export default {
     },
 
     async loadView(withLoading = true) {
+      if(withLoading){
+       this.$router.app.$emit('viewLoading', true)
+      }
       try {
-        if (withLoading) {
-          this.busy = true
-        }
-
         let documentSnapShots = await this.getDocumentSnapShots()
 
         if (!documentSnapShots) {
@@ -172,16 +156,16 @@ export default {
         await this.initMaxPlaces()
       } catch (error) {
         console.log(error)
-      } finally {
-        if (withLoading) {
-          this.busy = false
-        }
+      }
+      if(withLoading){
+        this.$router.app.$emit('viewLoading', false)
       }
     },
 
     async handleGoNext() {
       try {
         // Spécifiez le document à partir duquel commencer la pagination
+        this.busy = true
 
         let documentSnapShots = await this.getDocumentSnapShots(true)
 
@@ -196,6 +180,8 @@ export default {
         this.places = this.places.concat(nextPlaces)
       } catch (error) {
         console.log(error)
+      } finally {
+        this.busy = false
       }
     },
   },

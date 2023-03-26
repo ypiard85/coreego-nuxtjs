@@ -46,7 +46,27 @@ export default {
     }
   },
 
+  computed: {
+    ...mapGetters('app', { filters: 'getFilters' }),
+  },
+
+  async created() {
+    await this.getUserDisplayName()
+  },
+
   methods: {
+    async getUserDisplayName() {
+      if (this.filters && this.filters.user) {
+        const userDocumentRef = await this.$fire.firestore
+          .collection('users')
+          .doc(this.filters.user)
+          .get()
+        if (userDocumentRef.exists) {
+          this.value = userDocumentRef.data().displayName
+        }
+      }
+    },
+
     async remoteMethod(searchQuery) {
       if (searchQuery !== '') {
         this.loading = true
@@ -67,11 +87,11 @@ export default {
               return doc.data()
             })
 
-          this.list.filter((item) => {
-            return (
-              item.displayName.toLowerCase().indexOf(query.toLowerCase()) > -1
-            )
-          })
+          // this.list.filter((item) => {
+          //   return (
+          //     item.displayName.toLowerCase().indexOf(query.toLowerCase()) > -1
+          //   )
+          // })
         }, 200)
       } else {
         this.options = []
