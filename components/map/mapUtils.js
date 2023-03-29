@@ -23,7 +23,6 @@ export const initStreetMap = (id, lat, long) => {
     if (panoId) {
       roadview.setPanoId(panoId, position) //panoId와 중심좌표를 통해 로드뷰 실행
     }
-
     return roadviewClient
   })
 }
@@ -97,7 +96,6 @@ export const initMultiMarker = (id, places) => {
 
     // 마커 위에 커스텀오버레이를 표시합니다
     // 마커를 중심으로 커스텀 오버레이를 표시하기위해 CSS를 이용해 위치를 설정했습니다
-    console.log(content.length)
     var overlay = new kakao.maps.CustomOverlay({
       content: content,
       map: map,

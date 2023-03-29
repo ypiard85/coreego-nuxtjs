@@ -4,23 +4,23 @@
       <el-button-group>
         <el-button
           @click="$emit('change-mode', MODE_MAP_VIEW)"
-          :type="mapMode == MODE_MAP_VIEW ? 'primary' : '' "
+          :type="mapOptions.mode == MODE_MAP_VIEW ? 'primary' : '' "
           icon="el-icon-map-location"
         ></el-button>
         <el-button
           @click="$emit('change-mode', MODE_STREET_VIEW)"
-          :type="mapMode == MODE_STREET_VIEW ? 'primary' : '' "
+          :type="mapOptions.mode == MODE_STREET_VIEW ? 'primary' : '' "
           icon="el-icon-bicycle"
         ></el-button>
       </el-button-group>
 
       <el-button-group class="btn__group__map_type mt-5 d-flex flex-column"
-      v-if="mapMode === MODE_MAP_VIEW"
+      v-if="mapOptions.mode === MODE_MAP_VIEW"
       >
-        <el-button @click="$emit('change-type', TYPE_ROADMAP )" :class="[mapType === TYPE_ROADMAP && 'type-selected' ]" >
+        <el-button @click="$emit('change-type', TYPE_ROADMAP )" :class="[mapOptions.type === TYPE_ROADMAP && 'type-selected' ]" >
           <img  src="./images/plan.png" />
         </el-button>
-        <el-button @click="$emit('change-type', TYPE_HYBRID)" :class="[mapType === TYPE_HYBRID && 'type-selected']">
+        <el-button @click="$emit('change-type', TYPE_HYBRID)" :class="[mapOptions.type === TYPE_HYBRID && 'type-selected']">
           <img src="./images/satelite.png" />
         </el-button>
       </el-button-group>
@@ -38,14 +38,10 @@ import {
 
 export default {
   props: {
-    mapType: {
-      type: Number,
-      required: true,
-    },
-    mapMode: {
-      type: Number,
-      required: true,
-    },
+    mapOptions:{
+      type: Object,
+      required: true
+    }
   },
 
   data() {
