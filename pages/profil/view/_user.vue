@@ -264,7 +264,7 @@ export default {
           .collection('lieux')
           .where('user', '==', this.$route.params.user)
           .orderBy('updated_at', 'desc')
-          .limit(2)
+          .limit(5)
 
         if (profilDocumentRef.exists) {
           this.profil = profilDocumentRef.data()

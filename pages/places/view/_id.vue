@@ -216,8 +216,8 @@ export default {
 
     async loadView() {
       try {
+        this.$router.app.$emit('viewLoading', true)
         this.busy = true
-
         await this.loadPlace()
         await this.loadComments()
         await this.loadCarnet()
@@ -225,6 +225,7 @@ export default {
         console.log(error)
       } finally {
         this.busy = false
+        this.$router.app.$emit('viewLoading', false)
       }
     },
 
