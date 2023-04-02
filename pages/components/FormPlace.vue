@@ -12,10 +12,10 @@
         class="place-add_form"
         label-position="top"
       >
+      <!-- Remplacer les icon par bootstrap-vue-icons -->
         <el-form-item label="Titre" prop="title">
           <el-input placeholder="Titre du lieu" v-model="form.title"></el-input>
         </el-form-item>
-
         <input-geopoint
           ref="inputGeopoint"
           :latitude="form.latitude"
@@ -26,7 +26,7 @@
           @error-localisation="errorLocalisation = $event"
           @change-latitude="form.latitude = $event"
           @change-longitude="form.longitude = $event"
-          @open-kakao-map="map.openMap = true"
+          @open-kakao-map="openKakaoMap = true"
         >
           <template #error>
             <small
@@ -104,65 +104,56 @@
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" @click="submitForm('ruleForm')">
-            {{ !isEditMode ? 'Créer' : 'Modifier' }}
+          <el-button
+            type="success"
+            @click="submitForm('ruleForm')"
+            v-if="!isEditMode"
+            icon="el-icon-check fw-bold"
+          >
+            Je crée ce lieu
+          </el-button>
+          <el-button
+            type="success"
+            @click="submitForm('ruleForm')"
+            v-else
+            icon="el-icon-check fw-bold"
+          >
+            Je modifie ce lieu
           </el-button>
         </el-form-item>
       </el-form>
       <el-dialog
-        v-if="map.openMap"
-        :visible="map.openMap"
+        :visible="openKakaoMap"
         :fullscreen="true"
         :append-to-body="true"
       >
-        <KakaoMap
-          v-if="map.openMap"
-          id="mapmarker"
-          @change-type="
-            map.type = $event
-            reloadMap()
-          "
-          @change-mode="
-            map.mode = $event
-            reloadMap()
-          "
-          @close-map="map.openMap = false"
-          :lat="form.latitude"
-          :long="form.longitude"
-          :mapType="map.type"
-          :mapMode="map.mode"
-          :widthOptions="true"
+        <kakao-map
+          :place="{
+            geopoint: {
+              _lat: this.form.latitude,
+              _long: this.form.longitude,
+            },
+          }"
+          :showCloseBtn="true"
+          :showRedirectBtn="false"
+          :showTypeOptions="true"
+          :showModeOptions="true"
+          @close-map="openKakaoMap = false"
         />
       </el-dialog>
     </b-container>
-    <slot name="loading" v-else />
   </div>
 </template>
 <script>
+//Créer un controler pour kakaoMap -> ne plus passer par des fichiers différents
+
 import VuiInput from '~/components/vui-alpha/input/VuiInput'
 import VuiOptionsInput from '~/components/vui-alpha/input/VuiOptionsInput'
 import VuiFilesInput from '~/components/vui-alpha/input/VuiFilesInput'
-import VuiTextAreaInput from '~/components/vui-alpha/input/VuiTextAreaInput'
 import KakaoMap from '~/components/map/KakaoMap'
-import Axios from 'axios'
-import { mapGetters, mapActions } from 'vuex'
-import { auth, db, storage } from '~/plugins/firebase'
-import { getImageUrl } from './../../utils/request.js'
+import { mapGetters } from 'vuex'
 import HeaderPage from './HeaderPage'
-import {
-  getDownloadURL,
-  ref as storageRef,
-  deleteObject,
-  uploadBytesResumable,
-} from 'firebase/storage'
-import {
-  doc,
-  setDoc,
-  addDoc,
-  collection,
-  GeoPoint,
-  updateDoc,
-} from 'firebase/firestore'
+import { GeoPoint } from 'firebase/firestore'
 import InputGeopoint from '@/components/vui-alpha/input/InputGeopoint'
 import * as imageConversion from 'image-conversion'
 
@@ -172,7 +163,6 @@ export default {
     VuiInput,
     VuiOptionsInput,
     VuiFilesInput,
-    VuiTextAreaInput,
     KakaoMap,
     InputGeopoint,
     HeaderPage,
@@ -184,7 +174,7 @@ export default {
       required: true,
     },
     place: {
-      required: false
+      required: false,
     },
     placeLoaded: {
       type: Boolean,
@@ -234,13 +224,7 @@ export default {
           trigger: 'blur',
         },
       },
-
-      map: {
-        openMap: false,
-        type: 0,
-        mode: 2,
-        reload: false,
-      },
+      openKakaoMap: false,
     }
   },
 
@@ -250,6 +234,15 @@ export default {
       categories: 'getCategories',
       places: 'getPlaces',
     }),
+
+    mapOption() {
+      return {
+        ...this.mapOptions,
+        lat: this.form.latitude,
+        long: this.form.longitude,
+      }
+    },
+
     imageValidation() {
       return (
         this.previews.length > 0 ||
@@ -444,9 +437,9 @@ export default {
     },
 
     reloadMap() {
-      this.map.openMap = false
+      this.mapOptions.openMap = false
       this.$nextTick(() => {
-        this.map.openMap = true
+        this.mapOptions.openMap = true
       })
     },
   },

@@ -6,7 +6,13 @@
       :show-close="false"
       v-if="places"
     >
-      <KakaoMap id="mapmarker" :width-options="false" :isMultiMarker="true" :places="places" />
+      <kakao-map
+        :places="places"
+        :showCloseBtn="false"
+        :showRedirectBtn="true"
+        :showTypeOptions="true"
+        :showModeOptions="false"
+      />
     </el-dialog>
     <el-empty description="Votre carnet de route est vide" v-else></el-empty>
   </div>
@@ -48,7 +54,7 @@ export default {
               .collection('lieux')
               .doc(placeId)
               .get()
-              console.log(placeDocumentRef)
+            console.log(placeDocumentRef)
             if (placeDocumentRef.exists) {
               places.push({
                 ...placeDocumentRef.data(),

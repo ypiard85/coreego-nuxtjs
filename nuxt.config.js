@@ -63,6 +63,7 @@ export default {
   plugins: [
     { src: '~/plugins/element-ui.js' },
     { src: '~/plugins/firebase.js' },
+    { src: '~/plugins/bootstrap-vue.js', mode: 'client' },
   ],
 
   auth: {

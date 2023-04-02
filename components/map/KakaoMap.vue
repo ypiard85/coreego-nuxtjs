@@ -1,215 +1,186 @@
 <template>
   <div>
-    <div :id="id"></div>
-    <template v-if="widthOptions">
-      <MapUiOptions
-        @change-type="$emit('change-type', $event)"
-        @change-mode="$emit('change-mode', $event)"
-        :mapOptions="mapOptions"
-      />
+    <div id="map-container">
+      <div id="map" :class="{ 'in-first': mapMode === MODE_MAP }"></div>
+      <div id="streetview"></div>
+    </div>
+    <div class="buttons-options">
+      <div class="buttons-options-mode" v-if="showModeOptions">
+        <el-button-group>
+          <el-button
+            type="primary"
+            @click="changeMapMode(MODE_MAP)"
+            icon="el-icon-map-location"
+            :plain="mapMode != MODE_MAP"
+          ></el-button>
+          <el-button
+            type="primary"
+            icon="el-icon-truck"
+            @click="changeMapMode(MODE_STREET_VIEW)"
+            :plain="mapMode != MODE_STREET_VIEW"
+          ></el-button>
+        </el-button-group>
+      </div>
+      <div
+        class="buttons-options-type mt-3"
+        v-if="mapMode === MODE_MAP && showTypeOptions"
+      >
+        <el-button-group class="d-flex flex-column">
+          <el-button
+            @click="changeMapType(TYPE_ROADMAP)"
+            class="border border-3"
+            :class="{ 'border-dark': mapType == TYPE_ROADMAP }"
+          >
+            <img :src="require('./images/plan.png')" alt="" />
+          </el-button>
+          <el-button
+            @click="changeMapType(TYPE_HYBRID)"
+            class="border border-3"
+            :class="{ 'border-dark': mapType == TYPE_HYBRID }"
+          >
+            <img :src="require('./images/satelitte.png')" alt="" />
+          </el-button>
+        </el-button-group>
+      </div>
+    </div>
+    <div id="close-buttons">
+      <el-button v-if="showCloseBtn" @click="$emit('close-map')" type="danger">
+        <i class="el-icon-close fw-bold"></i>
+        FERMER</el-button
+      >
       <el-button
-        style="z-index: 1000"
-        type="danger"
-        size="mini"
-        class="btn__close position-fixed top-0 start-0 m-2"
+        v-if="showRedirectBtn"
         @click="$emit('close-map')"
-        >FERMER</el-button
-      >
-    </template>
-    <template v-if="isMultiMarker">
-      <el-button
-        style="z-index: 1000"
         type="success"
-        size="mini"
-        class="btn__close position-fixed top-0 start-0 m-2"
-        @click="backPage"
-        icon="el-icon-arrow-left"
-        >Revenir en arrière</el-button
       >
-    </template>
+        <i class="el-icon-refresh-left fw-bold"></i>
+        RETOUR AU PROFIL</el-button
+      >
+    </div>
   </div>
 </template>
 
 <script>
-import MapUiOptions from './map-ui/MapUiOptions'
-import {
-  TYPE_ROADMAP,
-  TYPE_HYBRID,
-  MODE_MAP_VIEW,
-  MODE_STREET_VIEW,
-} from '~/utils/variables.js'
-
 import { mapGetters } from 'vuex'
 
+const MODE_MAP = 1
+const MODE_STREET_VIEW = 2
+const TYPE_ROADMAP = 1
+const TYPE_HYBRID = 3
 export default {
-  components: { MapUiOptions },
+  name: 'KakaoMap',
+
   props: {
-    id: {
-      type: String,
-      reuqired: true,
-    },
-    widthOptions: {
+    showCloseBtn: {
       type: Boolean,
-      required: true,
+      required: false,
       default: true,
     },
-    mapOptions: {
-      type: Object,
-      required: false,
-      default: () => {},
-    },
-    isMultiMarker: {
+    showRedirectBtn: {
       type: Boolean,
       required: false,
       default: false,
     },
+    showTypeOptions: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
+    showModeOptions: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
+    place: {
+      type: Object,
+      required: false,
+      default: null,
+    },
     places: {
       type: Array,
-      required: false,
+      require: false,
       default: null,
     },
   },
 
   data() {
-    return {}
+    return {
+      MODE_MAP,
+      MODE_STREET_VIEW,
+      TYPE_HYBRID,
+      TYPE_ROADMAP,
+      mapMode: MODE_MAP,
+      map: null,
+      mapType: kakao.maps.MapTypeId.ROADMAP,
+      overlays: [],
+      openCard: null,
+    }
   },
-
   mounted() {
-    this.loadMap()
-  },
-
-  computed: {
-    ...mapGetters('app', {
-      categories: 'getCategories',
-      cities: 'getCities',
-    }),
-
-    cityName() {
-      return (cityId) => {
-        let label = ''
-        const cityFind = this.cities.find((city) => city.id === cityId)
-        if (cityFind) {
-          label = cityFind.label
-        }
-        return label
+    // Créez une nouvelle instance de la carte
+    this.map = new kakao.maps.Map(
+      document.getElementById('map'),
+      this.mapOption
+    )
+    var roadview = new kakao.maps.Roadview(
+      document.getElementById('streetview')
+    )
+    var roadviewClient = new kakao.maps.RoadviewClient()
+    var position = new kakao.maps.LatLng(this.geopoint.lat, this.geopoint.long)
+    roadviewClient.getNearestPanoId(position, 50, function (panoId) {
+      if (panoId) {
+        roadview.setPanoId(panoId, position) //panoId와 중심좌표를 통해 로드뷰 실행
       }
-    },
+    })
 
-    categoryName() {
-      return (categoryId) => {
-        let label = ''
-        const categoryFind = this.categories.find(
-          (category) => category.id === categoryId
-        )
-        console.log(categoryFind)
-        if (categoryFind) {
-          label = categoryFind.name
-        }
-        return label
-      }
-    },
-
-    mapType() {
-      let mapType = null
-      if (this.mapOptions.type == TYPE_HYBRID) {
-        mapType = kakao.maps.MapTypeId.HYBRID
-      } else if (this.mapOptions.type === TYPE_ROADMAP) {
-        mapType = kakao.maps.MapTypeId.ROADMAP
-      }
-      return mapType
-    },
-
-    mapOption() {
-      let mapOption = {}
-
-      if (this.isMultiMarker) {
-        mapOption = {
-          center: new kakao.maps.LatLng(
-            this.places[0].geopoint._lat,
-            this.places[0].geopoint._long
-          ),
-          level: 12,
-        }
-      } else {
-        mapOption = {
-          center: new kakao.maps.LatLng(
-            this.mapOptions.lat,
-            this.mapOptions.long
-          ), // 지도의 중심좌표
-          level: 6, // 지도의 확대 레벨
-        }
-      }
-
-      return mapOption
-    },
-  },
-
-  methods: {
-    async loadMap() {
-      if (!this.isMultiMarker) {
-        if (this.mapOptions.mode == MODE_MAP_VIEW) {
-          this.loadMapMarker()
-        } else if (this.mapOptions.mode == MODE_STREET_VIEW) {
-          this.loadMapStreetView()
-        }
-      } else {
-        if (Array.isArray(this.places)) {
-          console.log('is multi marker map')
-          this.loadMapMultiMarker()
-        }
-      }
-    },
-
-    loadMapMarker() {
-      var mapContainer = document.getElementById(this.id) // 지도를 표시할 div
-      var map = new kakao.maps.Map(mapContainer, this.mapOption) // 지도를 생성합니다
-      map.setMapTypeId(this.mapType)
+    if (this.place) {
       var marker = new kakao.maps.Marker()
-      marker.setPosition(map.getCenter())
-      return marker.setMap(map)
-    },
-
-    loadMapStreetView() {
-      var roadviewContainer = document.getElementById(this.id) //로드뷰를 표시할 div
-      var roadview = new kakao.maps.Roadview(roadviewContainer) //로드뷰 객체
-      var roadviewClient = new kakao.maps.RoadviewClient() //좌표로부터 로드뷰 파노ID를 가져올 로드뷰 helper객체
-      var position = new kakao.maps.LatLng(
-        this.mapOptions.lat,
-        this.mapOptions.long
-      )
-      // 특정 위치의 좌표와 가까운 로드뷰의 panoId를 추출하여 로드뷰를 띄운다.
-      roadviewClient.getNearestPanoId(position, 50, function (panoId) {
-        if (panoId) {
-          roadview.setPanoId(panoId, position) //panoId와 중심좌표를 통해 로드뷰 실행
-        }
-        return roadviewClient
-      })
-    },
-
-    loadMapMultiMarker() {
-      var mapContainer = document.getElementById(this.id)
-      var map = new kakao.maps.Map(mapContainer, this.mapOption)
-
+      marker.setPosition(this.map.getCenter())
+      marker.setMap(this.map)
+    } else if (this.places) {
       for (let place of this.places) {
-        let { _lat, _long } = place.geopoint
         var marker = new kakao.maps.Marker({
-          map: map,
-          position: new kakao.maps.LatLng(_lat, _long),
+          map: this.map,
+          position: new kakao.maps.LatLng(
+            place.geopoint._lat,
+            place.geopoint._long
+          ),
         })
-        var overlay = new kakao.maps.CustomOverlay({
-          content: this.contentHtml(place),
-          map: map,
+
+        const overlay = new kakao.maps.CustomOverlay({
+          content: this.markerCardHtml(place),
+          map: this.map,
           position: marker.getPosition(),
         })
-        let res = kakao.maps.event.addListener(marker, 'click', function () {
-          overlay.setMap(map)
+
+        this.overlays.push(overlay)
+        // 마커를 클릭했을 때 커스텀 오버레이를 표시합니다
+        kakao.maps.event.addListener(marker, 'click', () => {
+          this.overlays.forEach((overlay) => {
+            overlay.setMap(null)
+          })
+          overlay.setMap(this.map)
         })
-        console.log(res)
+
       }
+    }
+  },
+  methods: {
+    changeMapType(type) {
+      if (type === TYPE_HYBRID) {
+        this.mapType = kakao.maps.MapTypeId.HYBRID
+      } else if (type === TYPE_ROADMAP) {
+        this.mapType = kakao.maps.MapTypeId.ROADMAP
+      }
+      this.map.setMapTypeId(this.mapType)
     },
 
-    contentHtml(place) {
-      let content =
+    changeMapMode(mode) {
+      this.mapMode = mode
+    },
+
+    markerCardHtml(place) {
+      var content =
         '<div class="wrap">' +
         '    <div class="info">' +
         '        <div class="title text-truncate d-block">' +
@@ -228,7 +199,6 @@ export default {
         `                <div>
       <a href="https://map.kakao.com/link/to/${place.title},${place.geopoint._lat},${place.geopoint._long}" target="_blank" class="link">Navigation</a>
       <a href="/places/view/${place.id}" class="link">Voir le lieu</a>
-
       </div>` +
         '            </div>' +
         '        </div>' +
@@ -237,22 +207,111 @@ export default {
 
       return content
     },
+  },
+  computed: {
+    ...mapGetters('app', { cities: 'getCities', categories: 'getCategories' }),
 
-    backPage() {
-      this.$router.back()
+    cityName() {
+      return (cityId) => {
+        let cityFind = this.cities.find((city) => city.id === cityId)
+        if (cityFind) {
+          return cityFind.label
+        }
+      }
+    },
+
+    categoryName() {
+      return (categoryId) => {
+        let categoryFind = this.categories.find(
+          (category) => category.id === categoryId
+        )
+        if (categoryFind) {
+          return categoryFind.name
+        }
+      }
+    },
+
+    mapOption() {
+      return {
+        center: new kakao.maps.LatLng(this.geopoint.lat, this.geopoint.long),
+        level: 3,
+      }
+    },
+
+    geopoint() {
+      let geopoint = {}
+      if (this.place) {
+        geopoint = {
+          lat: this.place.geopoint._lat,
+          long: this.place.geopoint._long,
+        }
+      } else if (this.places) {
+        geopoint = {
+          lat: this.places[0].geopoint._lat,
+          long: this.places[0].geopoint._long,
+        }
+      }
+      return geopoint
     },
   },
 }
 </script>
 
-<style scoped>
-#mapmarker {
-  position: absolute;
+<style scoped lang="scss">
+#map-container {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+#map,
+#streetview {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
   width: 100%;
   height: 100%;
-  z-index: 1000 !important;
-  top: 0;
-  left: 0;
-  bottom: 0;
+}
+
+#map {
+  z-index: 10;
+
+  &.in-first {
+    z-index: 950;
+  }
+}
+
+#streetview {
+  z-index: 900;
+}
+
+.buttons-options {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+
+  &-type {
+    display: flex;
+    justify-content: flex-end;
+    .el-button {
+      padding: 0;
+      width: fit-content;
+    }
+    img {
+      width: 50px;
+      height: 50px;
+    }
+  }
+}
+
+#close-buttons {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1000;
 }
 </style>

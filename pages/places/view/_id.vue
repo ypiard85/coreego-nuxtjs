@@ -32,7 +32,7 @@
       </section>
 
       <section role="commentaires">
-        <b-container>
+        <b-container fluid="md">
           <comment
             @open-modal="modal = $event"
             :comments="comments"
@@ -60,7 +60,14 @@
             />
           </template>
           <template v-if="modal.name === 'kakaomap'">
-            <KakaoMapModal :place="place" @close="resetModalDatas" />
+            <kakao-map
+              :place="place"
+              :showCloseBtn="true"
+              :showRedirectBtn="false"
+              :showTypeOptions="true"
+              :showModeOptions="true"
+              @close-map="resetModalDatas"
+            />
           </template>
           <template v-if="modal.name === 'comments'">
             <comment-modal
@@ -99,8 +106,9 @@ import VuiBooleanButton from '@/components/vui-alpha/VuiBooleanButton'
 import GestionImagesModal from '@/components/modal/GestionImagesModal'
 import KakaoMapModal from '@/components/modal/KakaoMapModal.vue'
 import CommentModal from '@/components/modal/CommentModal'
+import KakaoMap from '../../../components/map/KakaoMap.vue'
 export default {
-  name: 'place',
+  name: 'singlePlace',
   components: {
     DiaporamaThumb,
     VuiCityCategory,
@@ -113,6 +121,7 @@ export default {
     VuiUser,
     SettingDropdown,
     GestionImagesModal,
+    KakaoMap,
   },
 
   data() {
@@ -169,7 +178,6 @@ export default {
   },
 
   methods: {
-
     resetModalDatas() {
       this.modal = {
         open: false,
@@ -252,7 +260,6 @@ export default {
         if (carnetDocumentRef.exists) {
           this.carnet = await carnetDocumentRef.data().places
         }
-
       } catch (error) {
         console.log(error)
       }

@@ -17,6 +17,7 @@
     "@nuxtjs/pwa": "^3.3.5",
     "axios": "^1.2.1",
     "bootstrap": "^5.2.3",
+    "bootstrap-icons-vue": "^1.10.3",
     "bootstrap-vue": "^2.23.1",
     "element-ui": "^2.15.12",
     "firebase": "^9.15.0",

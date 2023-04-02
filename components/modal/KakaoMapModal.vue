@@ -1,7 +1,7 @@
 <template>
   <div>
     <KakaoMap
-      v-if="!mapOptions.reload"
+      :key="reloadMap"
       id="mapmarker"
       @change-type="
         mapOptions.type = $event
@@ -13,7 +13,6 @@
       "
       @close-map="$emit('close')"
       :mapOptions="mapOptions"
-      :widthOptions="true"
     />
   </div>
 </template>
@@ -25,7 +24,7 @@ export default {
 
   components: { KakaoMap },
   props: {
-    place: {
+    geopoint: {
       type: Object,
       required: true,
     },
@@ -34,21 +33,18 @@ export default {
   data() {
     return {
       mapOptions: {
-        lat: this.place.geopoint._lat,
-        long: this.place.geopoint._long,
+        lat: this.geopoint.lat,
+        long: this.geopoint.long,
         type: 0,
         mode: 2,
-        reload: false,
       },
+      reloadMap: 0
     }
   },
 
   methods: {
     reloadmap() {
-      this.mapOptions.reload = true
-      this.$nextTick(() => {
-        this.mapOptions.reload = false
-      })
+      this.reloadMap++
     },
   },
 }

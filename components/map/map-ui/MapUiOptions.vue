@@ -1,31 +1,31 @@
 <template>
   <div>
-    <div class="custom_typecontrol">
-      <el-button-group>
+    <!-- <div class="custom_typecontrol">
+      <el-button-group v-if="showModeOptions">
         <el-button
           @click="$emit('change-mode', MODE_MAP_VIEW)"
-          :type="mapOptions.mode == MODE_MAP_VIEW ? 'primary' : '' "
+          :type="options.mode == MODE_MAP_VIEW ? 'primary' : '' "
           icon="el-icon-map-location"
         ></el-button>
         <el-button
           @click="$emit('change-mode', MODE_STREET_VIEW)"
-          :type="mapOptions.mode == MODE_STREET_VIEW ? 'primary' : '' "
+          :type="options.mode == MODE_STREET_VIEW ? 'primary' : '' "
           icon="el-icon-bicycle"
         ></el-button>
       </el-button-group>
 
       <el-button-group class="btn__group__map_type mt-5 d-flex flex-column"
-      v-if="mapOptions.mode === MODE_MAP_VIEW"
+      v-if="options.mode === MODE_MAP_VIEW && showTypeOptions"
       >
-        <el-button @click="$emit('change-type', TYPE_ROADMAP )" :class="[mapOptions.type === TYPE_ROADMAP && 'type-selected' ]" >
+        <el-button @click="$emit('change-type', TYPE_ROADMAP )" :class="[options.type === TYPE_ROADMAP && 'type-selected' ]" >
           <img  src="./images/plan.png" />
         </el-button>
-        <el-button @click="$emit('change-type', TYPE_HYBRID)" :class="[mapOptions.type === TYPE_HYBRID && 'type-selected']">
+        <el-button @click="$emit('change-type', TYPE_HYBRID)" :class="[options.type === TYPE_HYBRID && 'type-selected']">
           <img src="./images/satelite.png" />
         </el-button>
       </el-button-group>
 
-    </div>
+    </div> -->
   </div>
 </template>
 <script>
@@ -38,10 +38,20 @@ import {
 
 export default {
   props: {
-    mapOptions:{
+    options:{
       type: Object,
       required: true
-    }
+    },
+      showTypeOptions:{
+      type:Boolean,
+      required: false,
+      default: true
+    },
+    showModeOptions:{
+      type: Boolean,
+      required: false,
+      default: true
+    },
   },
 
   data() {
