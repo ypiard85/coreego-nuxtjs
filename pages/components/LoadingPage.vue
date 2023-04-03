@@ -1,5 +1,5 @@
 <template>
-    <div class="d-flex flex-column justify-content-center align-items-center loading__page" style="height: 100vh">
+    <div class="d-flex flex-column justify-content-center align-items-center loading__page">
         <div class="d-flex">
             <div class="point one"></div>
             <div class="point two"></div>
@@ -11,6 +11,13 @@
 
 <style scoped lang="scss">
    .loading__page {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        background: white;
         .point {
             background-color: $blue-principal;
             height: 30px;

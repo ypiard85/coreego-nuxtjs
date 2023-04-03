@@ -1,67 +1,68 @@
 <template>
   <div>
+    <div>
+      <div class="file_input_costume d-flex flex-wrap position-relative">
+        <template v-if="previews.length > 0">
+          <div
+            class="file__preview me-3 mb-3"
+            v-for="(preview, i) in previews"
+            :key="i"
+          >
+            <el-image :src="preview.url" fit="cover" />
+            <div class="file_control">
+              <i
+                class="el-icon-delete"
+                @click="$emit('delete-file-preview', i)"
+              ></i>
+            </div>
+          </div>
+        </template>
 
-  <div>
-  <div class="file_input_costume d-flex flex-wrap position-relative">
-    <div
-    v-if="previews.length > 0"
-    class="file__preview me-3 mb-3"
-    v-for="(preview, i) in previews"
-    :key="i"
-    >
-      <el-image :src="preview.url" fit="cover" />
-      <div class="file_control">
-        <i class="el-icon-delete" @click="$emit('delete-file-preview', i)"></i>
+        <el-card shadow="always" class="file_input">
+          <b-form-file
+            :required="required"
+            :id="id"
+            placeholder="Choose a file or drop it here..."
+            drop-placeholder="Drop file here..."
+            :accept="accept"
+            @change="$emit('change', $event)"
+            :multiple="multiple"
+          ></b-form-file>
+          <i class="el-icon-plus"></i>
+        </el-card>
       </div>
     </div>
 
-    <el-card shadow="always" class="file_input">
-      <b-form-file
-        :required="required"
-        :id="id"
-        placeholder="Choose a file or drop it here..."
-        drop-placeholder="Drop file here..."
-        :accept="accept"
-        @change="$emit('change', $event)"
-        :multiple="multiple"
-      ></b-form-file>
-      <i class="el-icon-plus"></i>
-    </el-card>
-    </div>
-  </div>
+    <section class="file_input_costume">
+      <div v-if="(images && images.length > 0) || trashImage.length > 0">
+        <div class="line"></div>
+        <strong>Images actuelle : </strong>
+        <div class="d-flex flex-wrap position-relative">
+          <div
+            class="file__preview me-3 mb-3"
+            v-for="(image, i) in images"
+            :key="i"
+          >
+            <el-image :src="image.url" fit="cover" />
+            <div class="file_control">
+              <i
+                class="el-icon-delete"
+                @click="$emit('delete-current-file', image)"
+              ></i>
+            </div>
+          </div>
+        </div>
 
-  <section class="file_input_costume">
-    <div
-    v-if="(images && images.length > 0) || trashImage.length > 0"
-    >
-    <div class="line"></div>
-    <strong>Images actuelle : </strong>
-    <div class="d-flex flex-wrap position-relative">
-    <div
-      class="file__preview me-3 mb-3"
-      v-for="(image, i) in images"
-      :key="i"
-    >
-      <el-image :src="image.url" fit="cover" />
-      <div class="file_control">
-        <i
-          class="el-icon-delete"
-          @click="$emit('delete-current-file', image)"
-        ></i>
+        <el-button
+          v-if="trashImage.length > 0"
+          type="danger"
+          @click="$emit('restore-images')"
+          icon="el-icon-refresh-left"
+        >
+          Restaurer</el-button
+        >
       </div>
-    </div>
-    </div>
-
-    <el-button
-      v-if="trashImage.length > 0"
-      type="danger"
-      @click="$emit('restore-images')"
-      icon="el-icon-refresh-left"
-      > Restaurer</el-button
-    >
-    </div>
-  </section>
-
+    </section>
   </div>
 </template>
 <script>
@@ -95,11 +96,11 @@ export default {
     trashImage: {
       required: false,
       default: () => {
-        return [];
+        return []
       },
     },
   },
-};
+}
 </script>
 <style lang="scss">
 .file_input_costume {

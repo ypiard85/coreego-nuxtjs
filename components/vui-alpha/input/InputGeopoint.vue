@@ -1,60 +1,55 @@
 <template>
-  <div>
-    <label class="el-form-item__label">Localisation</label>
-    <div>
+  <el-row :gutter="20">
+    <div class="px-3 mb-3">
+      <label class="el-form-item__label d-block w-100 mb-3 border-bottom"
+        >Localisation</label
+      >
+      <div>
         <el-button
-          title="géolocalisation"
-          :loading="isBusy"
+          size="small"
+          :loading="isBusyMap"
           type="primary"
           @click="onCurrentLocalisation"
-          icon="el-icon-discover"
-        />
+        >
+          <b-icon icon="compass" />
+          Ma localisation
+        </el-button>
         <el-button
+          :loading="isBusyMap"
           type="success"
-          disabled
-          icon="el-icon-map-location text-white"
-          v-if="!visibleKakaoMapBtn"
+          size="small"
+          :disabled="!visibleKakaoMapBtn"
           @click="$emit('open-kakao-map', true)"
-        ></el-button>
+          ><b-icon icon="map" />
+          Voir la map
+        </el-button>
+      </div>
     </div>
-
-    <!-- <el-col :xs="24" :sm="10" :md="10">
-        <el-form-item :prop="prop[0]">
-          <el-input placeholder="33.450701" label="latitude" :value="latitude" @input="$emit('change-latitude', $event)"
-            @blur="loadValidGeopoint">
-          </el-input>
-        </el-form-item>
-      </el-col>
-      <el-col :xs="24" :sm="10" :md="10">
-        <el-form-item :prop="prop[1]">
-          <label class="el-form-item__label">* Longitude</label>
-          <el-input placeholder="126.570667" :value="longitude" @input="$emit('change-longitude', $event)"
-          @blur="loadValidGeopoint">
-          <el-button class="bg-info" slot="append" icon="el-icon-map-location text-white" v-if="visibleKakaoMapBtn"
-          @click="$emit('open-kakao-map', true)"></el-button>
-        </el-input>
+    <el-col :xs="24" :sm="12" :md="12">
+      <el-form-item :prop="prop[0]" label="Latitude">
+        <el-input
+          placeholder="33.450701"
+          label="latitude"
+          :value="latitude"
+          @input="$emit('change-latitude', $event)"
+          @blur="loadValidGeopoint"
+        />
       </el-form-item>
-    </el-col> -->
-    <!-- <el-form-item :prop="prop[0]">
-          <el-input placeholder="33.450701" label="latitude" :value="latitude" @input="$emit('change-latitude', $event)"
-            @blur="loadValidGeopoint">
-          </el-input>
-        </el-form-item>
-      </el-col>
-      <el-col :xs="24" :sm="10" :md="10">
-        <el-form-item :prop="prop[1]">
-          <label class="el-form-item__label">* Longitude</label>
-          <el-input placeholder="126.570667" :value="longitude" @input="$emit('change-longitude', $event)"
-          @blur="loadValidGeopoint">
-          <el-button class="bg-info" slot="append" icon="el-icon-map-location text-white" v-if="visibleKakaoMapBtn"
-          @click="$emit('open-kakao-map', true)"></el-button>
-        </el-input>
-      </el-form-item> -->
-    <!-- <div>
+    </el-col>
+    <el-col :xs="24" :sm="12" :md="12">
+      <el-form-item :prop="prop[1]" label="Longitude">
+        <el-input
+          placeholder="126.570667"
+          :value="longitude"
+          @input="$emit('change-longitude', $event)"
+          @blur="loadValidGeopoint"
+        />
+      </el-form-item>
+    </el-col>
     <slot name="error" v-if="errorLocalisation" />
-  </div> -->
-  </div>
+  </el-row>
 </template>
+
 <script>
 import Axios from 'axios'
 export default {
@@ -83,16 +78,23 @@ export default {
   data() {
     return {
       visibleKakaoMapBtn: false,
-      isBusy: false,
+      isBusyMap: false,
+      isBusyLocalisation: false
     }
   },
 
   methods: {
-    async loadValidGeopoint(activeAuto = false) {
+    async loadValidGeopoint(activeAuto  = false) {
       this.$emit('error-localisation', false)
-      if ((this.latitude != '' && this.longitude != '') || activeAuto) {
+      const regex = /^[0-9.]+$/
+      if (
+        (this.latitude !== '' &&
+          this.longitude !== '' &&
+          regex.test(this.latitude) &&
+          regex.test(this.longitude)) || activeAuto
+      ) {
         try {
-          this.isBusy = true
+          this.isBusyMap = true
           await Axios.get(
             `https://nominatim.openstreetmap.org/reverse?format=json&lat=${this.latitude}&lon=${this.longitude}&zoom=18&addressdetails=1`
           ).then((res) => {
@@ -113,7 +115,7 @@ export default {
           this.visibleKakaoMapBtn = false
           this.$emit('error-localisation', true)
         } finally {
-          this.isBusy = false
+          this.isBusyMap = false
         }
       }
     },
@@ -130,9 +132,9 @@ export default {
           (error) => {
             // check if the user denied geolocation, or if there was any other problem
             if (error.code == error.PERMISSION_DENIED) {
-              alert('Geolocation has been disabled on this page')
+              alert('La géolocalisation a été désactivée sur cette page')
             } else {
-              alert('Unable to find your position, try again later.')
+              alert('Impossible de trouver votre position, réessayez plus tard.')
             }
           },
           {

@@ -1,22 +1,24 @@
 <template>
   <div>
     <HeaderPage :isEditMode="isEditMode" />
-    <b-container class="mt-3" v-if="placeLoaded" v-loading="busy">
+    <b-container class="mt-5" v-if="placeLoaded" v-loading="busy">
       <el-form
         @submit.native.prevent
         :status-icon="true"
         :model="form"
         :rules="rules"
         ref="ruleForm"
-        label-width="120px"
-        class="place-add_form"
-        label-position="top"
+        label-width="100px"
+        class="form-place"
+        label-position="left"
       >
-      <!-- Remplacer les icon par bootstrap-vue-icons -->
-        <el-form-item label="Titre" prop="title">
+        <!-- Remplacer les icon par bootstrap-vue-icons -->
+        <el-form-item label="Titre" prop="title" class="mb-5">
           <el-input placeholder="Titre du lieu" v-model="form.title"></el-input>
         </el-form-item>
+
         <input-geopoint
+          class="mb-5"
           ref="inputGeopoint"
           :latitude="form.latitude"
           :longitude="form.longitude"
@@ -29,18 +31,18 @@
           @open-kakao-map="openKakaoMap = true"
         >
           <template #error>
-            <small
-              style="margin-top: -10px; font-size: 12px; display: block"
-              class="text-danger"
-              >Les coordonnées géographiques sont hors Corée Du Sud</small
-            >
+            <small class="text-danger px-3">
+              <b-icon icon="exclamation-triangle-fill" variant="warning" font-scale="2"></b-icon>
+              Veuillez renseigner une localisation en Corée Du Sud
+            </small>
           </template>
         </input-geopoint>
 
-        <el-row type="flex" class="justify-content-between flex-wrap">
-          <el-col :xs="24" :sm="10" :md="10">
-            <el-form-item label="Ville">
+        <el-row :gutter="20" class="mb-5">
+          <el-col :xs="24" :sm="12" :md="12">
+            <el-form-item label="Provinces">
               <el-select
+                filterable
                 placeholder="Ville"
                 remote
                 v-model="form.city"
@@ -56,10 +58,11 @@
             </el-form-item>
           </el-col>
 
-          <el-col :xs="24" :sm="10" :md="10">
-            <el-form-item label="Categorie">
+          <el-col :xs="24" :sm="12" :md="12">
+            <el-form-item label="Categories">
               <el-select
                 placeholder="Categorie"
+                 filterable
                 remote
                 v-model="form.category"
                 style="width: 100%"
@@ -75,7 +78,7 @@
           </el-col>
         </el-row>
 
-        <el-form-item label="Images">
+        <el-form-item label="Images" class="mb-5">
           <vui-files-input
             :required="false"
             :images="form.images"
@@ -184,6 +187,29 @@ export default {
   },
 
   data() {
+
+    let latitudePass = (rule, value, callback) => {
+      const regex = /^[0-9.]+$/
+      if(!regex.test(value)){
+        callback(new Error('Des nombres sont demandés'))
+      }else if(value === ''){
+        callback(new Error('Le champ ne dois pas être vide'))
+      }else{
+        callback()
+      }
+    }
+
+    let longitudePass = (rule, value, callback) => {
+      const regex = /^[0-9.]+$/
+      if(!regex.test(value)){
+        callback(new Error('Des nombres sont demandés'))
+      }else if(value === ''){
+        callback(new Error('Le champ ne dois pas être vide'))
+      }else{
+        callback()
+      }
+    }
+
     return {
       busy: false,
       errorLocalisation: false,
@@ -211,11 +237,11 @@ export default {
         },
 
         latitude: [
-          { required: true, message: 'Le champ ne dois pas être vide' },
+          { required: true, validator: latitudePass , trigger: 'blur' },
         ],
 
         longitude: [
-          { required: true, message: 'Le champ ne dois pas être vide' },
+          { required: true, validator: longitudePass, trigger: 'blur' },
         ],
 
         description: {
@@ -289,7 +315,15 @@ export default {
     deleteCurrentFile($event) {
       try {
         this.$bvModal
-          .msgBoxConfirm('Voulez vous supprimer cette image ? ')
+          .msgBoxConfirm('Voulez vous supprimer cette image ? ', {
+            title: 'Confirmation',
+            size: 'sm',
+            buttonSize: 'sm',
+            okTitle: 'Supprimer',
+            okVariant: 'success',
+            cancelVariant: 'danger',
+            cancelTitle: 'Annuler',
+          })
           .then((val) => {
             if (val) {
               this.trashImage.push($event)
@@ -446,4 +480,46 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+::v-deep .form-place {
+  width: 700px;
+  max-width: 100%;
+  margin: auto;
+  .el-input__inner,
+  .el-textarea__inner {
+    font-weight: bold;
+    color: black;
+  }
+
+  label {
+    font-weight: bold;
+    font-size: 14px;
+  }
+
+  .el-form-item{
+    &.is-error{
+      .el-input__validateIcon{
+        font-size: 22px;
+        color: #F56C6C;
+      }
+    }
+    &--feedback{
+      .el-input__validateIcon{
+        font-size: 22px;
+        color: green;
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    .el-form-item {
+      display: flex;
+      flex-direction: column;
+
+      .el-form-item__content {
+        margin-left: 0px !important;
+      }
+    }
+  }
+}
+</style>

@@ -1,7 +1,7 @@
 <template>
-    <header class="bg-light py-5">
+    <header class="bg-primary py-5">
       <b-container>
-        <h1 class="text-blue fs-3">
+        <h1 class="text-white fs-3">
           <i :class="`el-icon-${iconTitle}`" class="fw-bold" ></i>
           {{ textTitle }}</h1>
       </b-container>
