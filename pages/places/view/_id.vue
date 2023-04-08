@@ -66,7 +66,7 @@
               :showRedirectBtn="false"
               :showTypeOptions="true"
               :showModeOptions="true"
-              @close-map="resetModalDatas"
+              @close="resetModalDatas"
             />
           </template>
           <template v-if="modal.name === 'comments'">

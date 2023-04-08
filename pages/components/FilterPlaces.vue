@@ -48,38 +48,30 @@
             ></el-option>
           </el-select>
         </div>
-
         <div class="col-md-4 col-xs-12 col-sm-6">
           <label for="user">
             <i class="el-icon-user"></i>
           </label>
-          <user-filter
-            class="w-100"
-            @change="handleFilters('user', $event)"
-          />
+          <user-filter class="w-100" @change="handleFilters('user', $event)" />
         </div>
-      </div>
-      <div class="row">
-       <span class="fw-bold mb-2">Sous filtres</span>
-        <div class="col-12">
-          <el-input
-            :value="filters.search"
-            @input="handleFilters('search', $event)"
-            placeholder="Rechercher un lieu"
-            trim="trim"
-            clearable="clearable"
+        <div class="col-md-4 col-xs-12 col-sm-6">
+          <label for="period">
+            <i class="el-icon-time"></i>
+          </label>
+          <el-select
+            id="category"
+            class="w-100"
+            name="period"
+            :value="filters.period"
+            @input="handleFilters('period', $event)"
           >
-            <template #prepend>
-              <el-button @click="handleFilters('date', !filters.date)">
-                Date
-                <i
-                  :class="`el-icon-caret-${
-                    filters.date ? 'bottom' : 'top'
-                  }`"
-                ></i>
-              </el-button>
-            </template>
-          </el-input>
+            <el-option
+              v-for="periodOption in PERIOD_OPTIONS"
+              :key="periodOption.value"
+              :label="periodOption.text"
+              :value="periodOption.value"
+            />
+          </el-select>
         </div>
       </div>
     </b-container>
@@ -88,6 +80,7 @@
 <script>
 import UserFilter from '~/components/filter/UserFilter'
 import { mapGetters } from 'vuex'
+import { PERIOD_OPTIONS, MORE_RECENT, MORE_OLDER } from '@/utils/variables.js'
 
 export default {
   name: 'filter-places',
@@ -96,34 +89,18 @@ export default {
   },
 
   props: {
-    filters:{
+    filters: {
       type: Object,
-      required: true
+      required: true,
     },
-
-    filteredDate: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    filteredCity: {
-
-      required: false,
-      default: null
-    },
-    filteredCategory: {
-      required: false,
-      default: null,
-    },
-    filteredSearch:{
-      type: String,
-      required: false,
-      default: ''
-    }
   },
 
   data() {
-    return {}
+    return {
+      PERIOD_OPTIONS,
+      MORE_RECENT,
+      MORE_OLDER,
+    }
   },
 
   computed: {
@@ -136,7 +113,7 @@ export default {
   methods: {
     handleFilters(key, value) {
       const filters = {}
-      filters[key] = value == '' && key !== 'search' ? null : value
+      filters[key] = value
       this.$emit('update-filters', filters)
     },
   },

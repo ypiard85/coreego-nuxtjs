@@ -50,7 +50,7 @@
       <el-button
         icon="el-icon-close"
         type="danger"
-        @click="$emit('close-modal')"
+        @click="$emit('close')"
         >Fermer</el-button
       >
       <el-button

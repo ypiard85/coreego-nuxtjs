@@ -73,7 +73,7 @@
                 <el-form-item>
                   <el-input
                     type="textarea"
-                    @input="inputAbout"
+                    @input="handleInputAbout"
                     id="description"
                     :value="about"
                     rows="10"
@@ -105,7 +105,9 @@
                 class="d-flex justify-content-between align-items-center"
               >
                 <span>Mon carnet de route</span>
+                <nuxt-link :to="'/carnet/' + user.uid ">
                 <el-button type="success" size="small">Voir la map</el-button>
+                </nuxt-link>
               </div>
               <div>
                 <template v-if="carnets.length">
@@ -305,7 +307,7 @@ export default {
       this.$router.app.$emit('viewLoading', false)
     },
 
-    inputAbout($event) {
+    handleInputAbout($event) {
       if ($event.length <= 500) {
         this.about = $event
       }

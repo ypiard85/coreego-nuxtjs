@@ -1,14 +1,13 @@
 import { db, auth } from '~/plugins/firebase.js'
-
+import { MORE_RECENT, MORE_OLDER } from '@/utils/variables.js'
 export const state = () => ({
   cities: null,
   categories: null,
   filters: {
-    search: '',
     category: null,
     city: null,
     user: null,
-    date: false,
+    period: MORE_RECENT,
   },
 
 })

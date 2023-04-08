@@ -5,7 +5,6 @@ export const IMG_HOME_PAGE_HEADER = require('../assets/wavecoreego.png');
 export const ICON_DIAPO_NEXT_BTN = `<i class="bi bi-arrow-right-circle-fill"></i>`;
 export const ICON_DIAPO_PREV_BTN = `<i class="bi bi-arrow-left-circle-fill"></i>`;
 
-
 //KAKAO MAP
 export const KAKAO_REST_API_KEY = '97965bbc84ec42f9935a273c8cfecfcb'
 
@@ -13,3 +12,17 @@ export const TYPE_ROADMAP = 0;
 export const TYPE_HYBRID = 1;
 export const MODE_MAP_VIEW = 2;
 export const MODE_STREET_VIEW = 3;
+
+export const MORE_RECENT = 0
+export const MORE_OLDER = 1
+
+export const PERIOD_OPTIONS = [
+   {
+      value: MORE_RECENT,
+      text: 'Du plus récent'
+   },
+   {
+      value: MORE_OLDER,
+      text: 'Du plus ancien'
+   }
+]

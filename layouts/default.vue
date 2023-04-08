@@ -1,8 +1,8 @@
 <template>
   <div>
-    <loading-page v-if="isLoading" />
     <navigation-bar :user="user" />
     <Nuxt class="mb-4" />
+    <loading-page v-if="isLoading" />
   </div>
 </template>
 

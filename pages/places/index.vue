@@ -42,6 +42,8 @@ import { mapGetters, mapActions } from 'vuex'
 import VuiSearchInput from '~/components/vui-alpha/input/VuiSearchInput'
 import CardPlace from '~/components/card/CardPlace'
 import FilterPlaces from '../components/FilterPlaces'
+import { MORE_RECENT, MORE_OLDER } from '@/utils/variables.js'
+
 export default {
   name: 'places',
 
@@ -105,7 +107,6 @@ export default {
         document = document.where('category', '==', this.filters.category)
       if (this.filters.user)
         document = document.where('user', '==', this.filters.user)
-
       return document
     },
 
@@ -113,7 +114,7 @@ export default {
       let documentRef = this.$fire.firestore
         .collection('lieux')
         .limit(20)
-        .orderBy('created_at', this.filters.date ? 'asc' : 'desc')
+        .orderBy('created_at', this.filters.period === MORE_RECENT  ?  'desc' : 'asc')
 
       if (goNext) {
         const lastDocument = this.places[this.places.length - 1]
@@ -130,7 +131,7 @@ export default {
     async initMaxPlaces() {
       let documentRef = this.$fire.firestore
         .collection('lieux')
-        .orderBy('updated_at', this.filters.date ? 'asc' : 'desc')
+        .orderBy('updated_at', this.filters.period === MORE_RECENT ? 'desc' : 'asc')
 
       documentRef = this.queryFiltered(documentRef)
 

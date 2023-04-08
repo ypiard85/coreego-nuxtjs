@@ -16,7 +16,7 @@ export default {
     },
 
     getUserLogged(state){
-        return state.user
+        return state.userLogged
     }
 
   },

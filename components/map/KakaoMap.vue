@@ -44,18 +44,16 @@
       </div>
     </div>
     <div id="close-buttons">
-      <el-button v-if="showCloseBtn" @click="$emit('close-map')" type="danger">
+      <el-button v-if="showCloseBtn" @click="$emit('close')" type="danger">
         <i class="el-icon-close fw-bold"></i>
         FERMER</el-button
       >
-      <el-button
-        v-if="showRedirectBtn"
-        @click="$emit('close-map')"
-        type="success"
-      >
-        <i class="el-icon-refresh-left fw-bold"></i>
-        RETOUR AU PROFIL</el-button
-      >
+      <nuxt-link v-if="showRedirectBtn" :to="'/profil/view/' + userLogged.uid">
+        <el-button type="success">
+          <i class="el-icon-refresh-left fw-bold"></i>
+          RETOUR AU PROFIL
+        </el-button>
+      </nuxt-link>
     </div>
   </div>
 </template>
@@ -161,7 +159,6 @@ export default {
           })
           overlay.setMap(this.map)
         })
-
       }
     }
   },
@@ -180,61 +177,80 @@ export default {
     },
 
     markerCardHtml(place) {
-      var content =
-        '<div class="wrap">' +
-        '    <div class="info">' +
-        '        <div class="title text-truncate d-block">' +
-        place.title +
-        '</div>' +
-        '        <div class="body">' +
-        '            <div class="img">' +
-        `               <img src="${place.thumbnail.url}">` +
-        '           </div>' +
-        '            <div class="desc">' +
-        '                <div class="ellipsis">' +
-        this.cityName(place.city) +
-        ' - ' +
-        this.categoryName(place.category) +
-        '</div>' +
-        `                <div>
-      <a href="https://map.kakao.com/link/to/${place.title},${place.geopoint._lat},${place.geopoint._long}" target="_blank" class="link">Navigation</a>
-      <a href="/places/view/${place.id}" class="link">Voir le lieu</a>
-      </div>` +
-        '            </div>' +
-        '        </div>' +
-        '    </div>' +
-        '</div>'
-
+      var content = `
+        <div class="wrap">
+          <div class="info">
+           <div class="title text-truncate d-block">
+            ${place.title}
+           </div>
+           <div class="body">
+            <div class="img">
+              <img src="${place.thumbnail.url}">
+            </div>
+            <div class="desc mt-1 ">
+              <div class="d-flex flex-column mb-2">
+                <span class="d-flex align-items-center mb-2 h6">
+                  <i class="el-icon-location-outline"></i>
+                  <span>${this.city(place.city).label}</span>
+                </span>
+                <span class="px-1 align-self-start text-white fw-bold" style="background-color: ${
+                  this.category(place.category).color
+                }; border-radius: 8px" >${
+        this.category(place.category).name
+      }</span>
+              </div>
+              <div>
+                <a class="el-button el-button--success p-1 el-button--small me-1" href="https://map.kakao.com/link/to/${place.title},${
+        place.geopoint._lat
+      },${place.geopoint._long}"
+                target="_blank" class="link">
+                  <span class="el-icon-map-location"></span>
+                  ouvrir GPS
+                </a>
+                    <a class="el-button el-button--primary p-1 el-button--small" href="/places/view/${
+                      place.id
+                    }" class="link"><span class="el-icon-view me-1"></span>voir le lieu</a>
+              </div>
+            </div>
+           </div>
+          </div>
+        </div>
+      `
       return content
     },
   },
   computed: {
     ...mapGetters('app', { cities: 'getCities', categories: 'getCategories' }),
+    ...mapGetters('auth', { userLogged: 'getUserLogged' }),
 
-    cityName() {
+    city() {
       return (cityId) => {
+        let city = null
         let cityFind = this.cities.find((city) => city.id === cityId)
         if (cityFind) {
-          return cityFind.label
+          city = cityFind
         }
+        return city
       }
     },
 
-    categoryName() {
+    category() {
       return (categoryId) => {
+        let category = null
         let categoryFind = this.categories.find(
           (category) => category.id === categoryId
         )
         if (categoryFind) {
-          return categoryFind.name
+          category = categoryFind
         }
+        return category
       }
     },
 
     mapOption() {
       return {
         center: new kakao.maps.LatLng(this.geopoint.lat, this.geopoint.long),
-        level: 3,
+        level: this.places ? 12 : 3,
       }
     },
 
