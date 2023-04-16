@@ -1,5 +1,5 @@
 <template>
-    <header class="bg-primary py-5">
+    <header class="bg-primary py-3">
       <b-container>
         <h1 class="text-white fs-3">
           <i :class="`el-icon-${iconTitle}`" class="fw-bold" ></i>

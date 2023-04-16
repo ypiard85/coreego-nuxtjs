@@ -14,6 +14,7 @@
             :plain="mapMode != MODE_MAP"
           ></el-button>
           <el-button
+            :disabled="!displayRoadView"
             type="primary"
             icon="el-icon-truck"
             @click="changeMapMode(MODE_STREET_VIEW)"
@@ -99,6 +100,11 @@ export default {
       require: false,
       default: null,
     },
+    displayRoadView: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
   },
 
   data() {
@@ -111,7 +117,8 @@ export default {
       map: null,
       mapType: kakao.maps.MapTypeId.ROADMAP,
       overlays: [],
-      openCard: null,
+
+      streetViewInError: false,
     }
   },
   mounted() {
@@ -125,9 +132,10 @@ export default {
     )
     var roadviewClient = new kakao.maps.RoadviewClient()
     var position = new kakao.maps.LatLng(this.geopoint.lat, this.geopoint.long)
-    roadviewClient.getNearestPanoId(position, 50, function (panoId) {
+
+    roadviewClient.getNearestPanoId(position, 50, function (panoId, status) {
       if (panoId) {
-        roadview.setPanoId(panoId, position) //panoId와 중심좌표를 통해 로드뷰 실행
+        roadview.setPanoId(panoId, position)
       }
     })
 
@@ -200,9 +208,9 @@ export default {
       }</span>
               </div>
               <div>
-                <a class="el-button el-button--success p-1 el-button--small me-1" href="https://map.kakao.com/link/to/${place.title},${
-        place.geopoint._lat
-      },${place.geopoint._long}"
+                <a class="el-button el-button--success p-1 el-button--small me-1" href="https://map.kakao.com/link/to/${
+                  place.title
+                },${place.geopoint._lat},${place.geopoint._long}"
                 target="_blank" class="link">
                   <span class="el-icon-map-location"></span>
                   ouvrir GPS

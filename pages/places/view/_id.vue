@@ -152,7 +152,7 @@ export default {
     }),
 
     currentUser() {
-      return this.$fire.auth ? this.$fire.auth.currentUser.uid : null
+      return this.$fire.auth && this.$fire.auth.currentUser ? this.$fire.auth.currentUser.uid : null
     },
 
     isAuthPlace() {

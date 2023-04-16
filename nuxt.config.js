@@ -1,5 +1,6 @@
 import path from 'path'
 import fs from 'fs'
+require('dotenv').config()
 
 export default {
   // Disable server-side rendering: https://go.nuxtjs.dev/ssr-mode
@@ -11,6 +12,12 @@ export default {
   meta: { layout: 'layoutApp' },
 
   store: '~/store/authentification.store.js',
+
+  env:{
+    NODE_ENV: process.env.NODE_ENV,
+    KAKAO_API_KEY: process.env.KAKAO_API_KEY,
+    KAKAO_REST_API_KEY: process.env.KAKAO_REST_API_KEY
+  },
 
   server: {
     https: {
@@ -32,7 +39,7 @@ export default {
     title: 'coreego-nuxtjs-vuejs',
     script: [
       {
-        src: 'https://dapi.kakao.com/v2/maps/sdk.js?appkey=138cf5e41b9fe087d4b159aae861026b',
+        src: `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.KAKAO_API_KEY}`,
       },
       { src: 'https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.js' },
     ],

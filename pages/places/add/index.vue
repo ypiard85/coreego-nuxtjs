@@ -1,15 +1,14 @@
 <template>
   <div>
-    <form-place :isEditMode="false"/>
+    <place-form :isEditMode="false" />
   </div>
 </template>
 <script>
-  import FormPlace from './../../components/FormPlace'
+import PlaceForm from '../../../components/form/PlaceForm.vue'
   export default {
     name: 'placeAdd',
-    middleware: 'authenticated',
     components: {
-      FormPlace
+      PlaceForm
     },
 
   }

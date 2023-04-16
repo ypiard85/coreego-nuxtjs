@@ -2,150 +2,121 @@
   <div>
     <HeaderPage :isEditMode="isEditMode" />
     <b-container class="mt-2" v-if="placeLoaded" v-loading="busy">
-      <el-form label-position="top">
-        <!-- pointage options-->
+      <el-form
+        ref="ruleForm"
+        label-position="top"
+        :rules="rules"
+        :model="form"
+        status-icon
+      >
+        <!--  -->
         <el-form-item>
           <label class="el-form-item__label" for="pointages">
             <b-icon icon="pin-fill" />
             Ajouter depuis mes pointages
           </label>
-          <el-select class="w-100" v-model="pointageValue" id="pointages">
-            <el-option label="--Pas de pointage--" :value="null" />
-            <el-option
-              :label="pointageOption.title"
-              :value="pointageOption.id"
-              :key="pointageOption.id"
-              v-for="pointageOption in pointageOptions"
-            />
-          </el-select>
+          <pointage-input
+            class="w-100"
+            :options="[{ id: 1, title: 'premier titre' }]"
+            v-model="pointageValue"
+            @input="pointageValue = $event"
+          />
         </el-form-item>
-
-        <!-- titre -->
+        <!--  -->
         <el-form-item prop="title">
           <label class="el-form-item__label" for="title">
             <b-icon icon="text-left" />
             Titre
           </label>
-          <el-input
-            id="title"
-            placeholder="Titre du lieu"
-            v-model="form.title"
-            maxlength="50"
-            show-word-limit
+          <title-input @input="form.title = $event" v-model="form.title" />
+        </el-form-item>
+
+        <el-form-item prop="localisation">
+          <label class="el-form-item__label" for="localisation">
+            <b-icon icon="pin-map-fill" />
+            Adresse / Recherche / Coordonnées GPS
+          </label>
+          <localisation-input
+            prop="localisation"
+            :isEditMode="isEditMode"
+            :localisation="form.localisation"
+            @update-localisation="form.localisation = $event"
           />
         </el-form-item>
 
-        <!-- Géolocalisation -->
-        <input-geopoint
-          ref="inputGeopoint"
-          :formObject="form"
-          @update-address="form.address = $event"
-          @update-latitude="form.latitude = $event"
-          @update-longitude="form.longitude = $event"
-          @update-city="form.city = $event"
-          :isEditMode="isEditMode"
-        />
-
-        <el-form-item>
+        <el-form-item v-if="cities" prop="city">
           <label class="el-form-item__label" for="provinces">
             <b-icon icon="image-alt" />
             Provinces
           </label>
-          <el-select
+          <city-input
             id="provinces"
-            filterable
-            placeholder="Provinces"
+            class="w-100"
+            :options="cities"
             v-model="form.city"
-            style="width: 100%"
-          >
-            <el-option
-              v-for="city in cities"
-              :key="city.id"
-              :value="city.id"
-              :label="city.label"
-            />
-          </el-select>
+            @input="form.city = $event"
+          />
         </el-form-item>
 
-        <el-form-item>
+        <el-form-item v-if="categories" prop="category">
           <label class="el-form-item__label" for="categories">
             <b-icon icon="folder" />
             Categories
           </label>
-          <el-select
-            id="categories"
-            placeholder="Categorie"
-            filterable
-            remote
+          <category-input
+            class="w-100"
+            :options="categories"
             v-model="form.category"
-            style="width: 100%"
-          >
-            <el-option
-              v-for="category in categories"
-              :key="category.id"
-              :value="category.id"
-              :label="category.name"
-            />
-          </el-select>
+            @input="form.category = $event"
+          />
         </el-form-item>
 
-        <el-form-item>
+        <el-form-item prop="images">
           <label class="el-form-item__label" for="images">
             <b-icon icon="image" />
             Images
           </label>
-          <vui-files-input
+          <files-input
             :required="false"
             :images="form.images"
-            id="images"
             accept=".jpg, .png, .jpeg"
             @change="onPreviewFiles($event)"
             :previews="previews"
-            :multiple="true"
             :trashImage="trashImage"
             @delete-file-preview="deleteFilePreview($event)"
             @delete-current-file="deleteCurrentFile($event)"
             @restore-images="restoreImages"
           />
-          <small v-if="!imageValidation" class="text-danger"
-            >Veuillez ajouter au moins une image</small
-          >
         </el-form-item>
 
-
-        <el-form-item  prop="description">
+        <el-form-item prop="description">
           <label class="el-form-item__label" for="description">
             <b-icon icon="text-left" />
             Description
           </label>
-          <el-input
-            placeholder="Petite description"
-            :rows="10"
-            type="textarea"
+          <description-input
+            @input="form.description = $event"
             v-model="form.description"
-          ></el-input>
+          />
         </el-form-item>
 
-          <el-button
-            type="success"
-            @click="submitForm('ruleForm')"
-            v-if="!isEditMode"
-            icon="el-icon-check fw-bold"
-          >
-            Je crée ce lieu
-          </el-button>
-          <el-button
-            type="success"
-            @click="submitForm('ruleForm')"
-            v-else
-            icon="el-icon-check fw-bold"
-          >
-            Je modifie ce lieu
-          </el-button>
-
+        <el-button
+          type="success"
+          @click="submitForm('ruleForm')"
+          v-if="!isEditMode"
+          icon="el-icon-check fw-bold"
+        >
+          Je crée ce lieu
+        </el-button>
+        <el-button
+          type="success"
+          @click="submitForm('ruleForm')"
+          v-else
+          icon="el-icon-check fw-bold"
+        >
+          Je modifie ce lieu
+        </el-button>
       </el-form>
-
-
     </b-container>
   </div>
 </template>
@@ -153,32 +124,34 @@
 //Créer un controler pour kakaoMap -> ne plus passer par des fichiers différents
 
 import VuiInput from '~/components/vui-alpha/input/VuiInput'
-import VuiOptionsInput from '~/components/vui-alpha/input/VuiOptionsInput'
-import VuiFilesInput from '~/components/vui-alpha/input/VuiFilesInput'
 import KakaoMap from '~/components/map/KakaoMap'
 import { mapGetters } from 'vuex'
-import HeaderPage from './HeaderPage'
+import HeaderPage from '@/pages/components/HeaderPage'
 import { GeoPoint } from 'firebase/firestore'
 import InputGeopoint from '@/components/vui-alpha/input/InputGeopoint'
-import {
-  STEP_OPTIONS,
-  STEP_TITLE,
-  STEP_LOCALISATION,
-  STEP_CATEGORY,
-  STEP_PICTURE,
-  STEP_DESCRIPTION,
-} from '@/utils/variables'
 import * as imageConversion from 'image-conversion'
+import TitleInput from './input/TitleInput.vue'
+import PointageInput from './input/PointageInput.vue'
+import LocalisationInput from './input/LocalisationInput.vue'
+import CategoryInput from './input/CategoryInput.vue'
+import CityInput from './input/CityInput.vue'
+import FilesInput from './input/FilesInput.vue'
+import DescriptionInput from './input/DescriptionInput.vue'
 
 export default {
   name: 'place-form',
   components: {
     VuiInput,
-    VuiOptionsInput,
-    VuiFilesInput,
     KakaoMap,
     InputGeopoint,
     HeaderPage,
+    TitleInput,
+    PointageInput,
+    LocalisationInput,
+    CityInput,
+    CategoryInput,
+    FilesInput,
+    DescriptionInput
   },
 
   props: {
@@ -197,53 +170,70 @@ export default {
   },
 
   data() {
-    return {
-      STEP_TITLE,
-      STEP_LOCALISATION,
-      STEP_CATEGORY,
-      STEP_PICTURE,
-      STEP_DESCRIPTION,
+    let validatorLocalisation = (rule, value, callback) => {
+      if (
+        this.form.localisation.value.length &&
+        this.form.localisation.latitude.length &&
+        this.form.localisation.longitude.length
+      ) {
+        callback()
+      } else {
+        callback(new Error('Veuillez selectionnez une adresse'))
+      }
+    }
 
+    let validationImages = (rule, value, callback) => {
+      if (this.form.images.length) {
+        callback()
+      } else {
+        callback(new Error('Veuillez ajouter 1 image au minimum'))
+      }
+    }
+
+    let validationTexte = (rule, value, callback) => {
+      if(value.trim().length){
+         callback()
+      } else {
+        callback(new Error('Ce champ ne doit pas être vide'))
+      }
+    }
+
+    return {
       busy: false,
       errorLocalisation: false,
 
-      pointageValue: null,
-      currentStep: 1, //Current step
-      stepOptions: STEP_OPTIONS,
-
       pointageOptions: [],
-
+      pointageValue: null,
       previews: [],
-
       trashImage: [],
 
       form: {
-        title: null,
-        address: null,
-        latitude: null,
-        longitude: null,
+        title: '',
+        localisation: {},
         city: null,
         category: null,
         images: [],
         thumbnail: null,
         thumbnailUrl: null,
-        description: null,
-      },
-
-      rules: {
-        title: {
-          required: true,
-          message: 'Le champ ne dois pas être vide',
-          trigger: 'blur',
-        },
-
-        description: {
-          required: true,
-          message: 'Le champ ne dois pas être vide',
-          trigger: 'blur',
-        },
+        description: '',
       },
       openKakaoMap: false,
+
+      rules: {
+        localisation: {
+          required: true,
+          validator: validatorLocalisation,
+          trigger: ['blur', 'change'],
+        },
+        title: [
+         {required: true, validator: validationTexte, trigger: ['blur', 'change']},
+          { max: 50, message: 'Ce champ doit pas dépasser 50 caractères' },
+        ],
+        images: { required: true, validator: validationImages },
+        description: {required: true, validator: validationTexte, trigger: ['blur', 'change']},
+        city: {required: true, message: 'Ce champ ne doit pas être vide' },
+        category: {required: true, message: 'Ce champ ne doit pas être vide' }
+      },
     }
   },
 
@@ -252,14 +242,6 @@ export default {
       cities: 'getCities',
       categories: 'getCategories',
     }),
-
-    mapOption() {
-      return {
-        ...this.mapOptions,
-        lat: this.form.latitude,
-        long: this.form.longitude,
-      }
-    },
 
     imageValidation() {
       return (
@@ -281,10 +263,6 @@ export default {
   },
 
   methods: {
-    updateCurrentStep($event) {
-      this.currentStep = $event
-    },
-
     onPreviewFiles($event) {
       for (let file of $event.target.files) {
         imageConversion
@@ -333,14 +311,12 @@ export default {
     async hydrateForm() {
       let formData = {
         title: null,
-        address: null,
-        latitude: null,
-        longitude: null,
+        localisation: {},
         city: null,
         category: null,
         images: [],
         thumbnail: null,
-        description: null,
+        description: '',
       }
 
       if (this.isEditMode && this.place) {
@@ -354,10 +330,14 @@ export default {
         formData.images = this.place.images
       } else {
         formData.title = ''
-        formData.latitude = ''
-        formData.longitude = ''
-        formData.city = this.cities[0].id
-        formData.category = this.categories[0].id
+        formData.localisation = {
+          value: '',
+          latitude: '',
+          longitude: '',
+          displayRoadView: false,
+        }
+        formData.city = this.cities && this.cities[0].id
+        formData.category = this.categories && this.categories[0].id
       }
 
       //On applique les datas formatés à l'objet form
@@ -457,13 +437,6 @@ export default {
         created_at: new Date(),
         updated_at: new Date(),
       }
-    },
-
-    reloadMap() {
-      this.mapOptions.openMap = false
-      this.$nextTick(() => {
-        this.mapOptions.openMap = true
-      })
     },
   },
 }

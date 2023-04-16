@@ -18,9 +18,9 @@
           </div>
         </template>
 
-        <el-card shadow="always" class="file_input">
+        <el-card shadow class="file_input">
           <b-form-file
-            :id="id"
+            id="images"
             placeholder="Choose a file or drop it here..."
             drop-placeholder="Drop file here..."
             accept=".jpg, .png, .jpeg"
@@ -67,16 +67,8 @@
 <script>
 export default {
   props: {
-    id: {
-      type: String,
-      required: true,
-    },
     previews: {
       type: Array,
-      required: true,
-    },
-    multiple: {
-      type: Boolean,
       required: true,
     },
     images: {
@@ -93,7 +85,7 @@ export default {
   },
 }
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
 .file_input_costume {
   .file_input {
     position: relative;
