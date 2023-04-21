@@ -1,68 +1,45 @@
 <template>
-  <div>
-    <navigation-bar :user="user" />
-    <Nuxt class="mb-4" />
-    <loading-page v-if="isLoading" />
+  <div class="app-container">
+    <kakao-map  />
+    <Nuxt />
   </div>
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex'
-import NavigationBar from '~/pages/components/NavigationBar'
-import LoadingPage from '~/pages/components/LoadingPage'
-
+import KakaoMap from '../components-app/maps/KakaoMap.vue'
+import {mapActions} from 'vuex'
 export default {
+  components: { KakaoMap },
   name: 'layout',
-  components: { NavigationBar, LoadingPage },
 
   data() {
     return {
-      isLoading: false,
-      user: null,
+
     }
   },
 
-  async created() {
-        this.$router.app.$on('viewLoading', (value) => {
-      this.isLoading = value
-    })
-    await this.initApp()
-
-    await this.$fire.auth.onAuthStateChanged(() => {
-      this.user = this.$fire.auth.currentUser
-      if (this.user) {
-        console.log('user logged')
-        this.setIsLogged(true)
-        this.setUserLogged(this.user)
-      } else {
-        console.log('user unlogged')
-        this.setIsLogged(false)
-        this.setUserLogged(null)
-      }
-    })
+  methods:{
+    ...mapActions('topic', ['setTopics'])
   },
 
-  computed: {
-    ...mapGetters('auth', { userLogged: 'getUserLogged' }),
+  async created(){
+    await this.setTopics()
   },
 
-  methods: {
-    ...mapActions('auth', ['setIsLogged', 'setUserLogged']),
-    ...mapActions('app', ['loadCities', 'loadCategories']),
-
-    async initApp() {
-      try {
-        this.isLoading = true
-        await Promise.all([this.loadCities(), this.loadCategories()])
-      } catch (error) {
-        console.log(error)
-      } finally {
-        this.isLoading = false
-      }
-    },
-  },
-  //mixin dans main.js
+  computed: {},
 }
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.map-container {
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+
+  #map,
+  #streetview {
+    width: 100%;
+    height: 100%;
+  }
+}
+</style>
