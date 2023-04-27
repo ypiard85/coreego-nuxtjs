@@ -35,7 +35,7 @@ export default {
     title: 'coreego-nuxtjs-vuejs',
     script: [
       {
-        src: `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.KAKAO_API_KEY}`,
+        src: `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.KAKAO_API_KEY}&libraries=services`,
       },
       { src: 'https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.js' },
     ],
