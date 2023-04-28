@@ -13,10 +13,10 @@ export default {
 
   store: '~/store/authentification.store.js',
 
-  env:{
+  env: {
     NODE_ENV: process.env.NODE_ENV,
     KAKAO_API_KEY: process.env.KAKAO_API_KEY,
-    KAKAO_REST_API_KEY: process.env.KAKAO_REST_API_KEY
+    KAKAO_REST_API_KEY: process.env.KAKAO_REST_API_KEY,
   },
 
   server: {
@@ -35,7 +35,7 @@ export default {
     title: 'coreego-nuxtjs-vuejs',
     script: [
       {
-        src: `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.KAKAO_API_KEY}&libraries=services`,
+        src: `//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.KAKAO_API_KEY}&libraries=services&lang=en`,
       },
       { src: 'https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.js' },
     ],
@@ -91,8 +91,8 @@ export default {
       // Firestore Settings - currently only works in SPA mode
     },
     enablePersistence: {
-      synchronizeTabs: true
-    }
+      synchronizeTabs: true,
+    },
   },
 
   storage: true,

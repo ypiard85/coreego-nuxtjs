@@ -1,9 +1,17 @@
 <template>
-  <div class="drawer-header">
-    <el-image class="p-2" :src="LOGO_PATH" style="width: 200px; height: auto" />
-    <el-button class="drawer-header-button" variant="default" @click="$emit('click')" >
+  <div class="drawer-header py-3">
+    <el-image
+      class="m-auto"
+      :src="LOGO_PATH"
+      style="width: 200px; height: auto"
+    />
+    <!-- <el-button
+      class="drawer-header-button"
+      variant="default"
+      @click="$emit('click')"
+    >
       <b-icon icon="list"></b-icon>
-    </el-button>
+    </el-button> -->
   </div>
 </template>
 
@@ -25,10 +33,11 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
-   border-bottom: 1px solid rgba(175, 170, 170, 0.359);
+  border-bottom: 1px solid rgba(175, 170, 170, 0.359);
   &-button {
     border: none;
     font-size: 34px;
+    background: transparent;
   }
 }
 </style>

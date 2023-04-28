@@ -65,16 +65,16 @@ export default {
       })
     },
 
-    closeRoadView(){
+    closeRoadView() {
       this.reloadMap()
       this.mapMode = MODE_MAP_VIEW
     },
 
-    handleDisplayStreetView($event){
+    handleDisplayStreetView($event) {
       this.reloadMap()
       this.selectTopic = $event
       this.mapMode = MODE_STREET_VIEW
-      console.log( this.selectTopic)
+      console.log(this.selectTopic)
     },
 
     handleQueryResult(querySearch) {
